@@ -26,8 +26,8 @@ namespace RevitDoomNetPort
         {
             try
             {
-                ConsoleHelper.EnableVirtualTerminalProcessing();
-                Console.OutputEncoding = System.Text.Encoding.UTF8;
+                //ConsoleHelper.EnableVirtualTerminalProcessing();
+                //Console.OutputEncoding = System.Text.Encoding.UTF8;
 
                 var argsList = new[] { "-iwad", IwadPath };
                 if (ExtraArgs.Length > 0)
@@ -52,11 +52,11 @@ namespace RevitDoomNetPort
                 int height = renderer.Height;
                 var buffer = new byte[4 * width * height];
 
-                Console.Clear();
+                //Console.Clear();
 
                 while (true)
                 {
-                    Console.SetCursorPosition(0, 0);
+                    //Console.SetCursorPosition(0, 0);
 
                     if (doom.Menu.Active || doom.State != DoomState.Game)
                     {
@@ -70,7 +70,7 @@ namespace RevitDoomNetPort
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error: " + e);
+                //Console.WriteLine("Error: " + e);
             }
         }
     }
