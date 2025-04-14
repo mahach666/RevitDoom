@@ -1,15 +1,15 @@
-﻿using RevitDoom.UserInput;
-using RevitDoom.Utils;
-using RevitDoom.Video;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using DoomNetFrameworkEngine;
 using DoomNetFrameworkEngine.DoomEntity;
 using DoomNetFrameworkEngine.DoomEntity.Game;
 using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.Video;
+using RevitDoom.UserInput;
+using RevitDoom.Video;
 using System;
-using System.Linq;
-using Autodesk.Revit.DB;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RevitDoomNetPort
 {
@@ -20,15 +20,12 @@ namespace RevitDoomNetPort
         public string[] ExtraArgs;
         public uint Scale;
         public Document Doc;
+        public UIDocument Uidoc;
         public IList<FilledRegion> Pixels;
-
         public void Run()
         {
             try
             {
-                //ConsoleHelper.EnableVirtualTerminalProcessing();
-                //Console.OutputEncoding = System.Text.Encoding.UTF8;
-
                 var argsList = new[] { "-iwad", IwadPath };
                 if (ExtraArgs.Length > 0)
                 {
@@ -52,13 +49,11 @@ namespace RevitDoomNetPort
                 int height = renderer.Height;
                 var buffer = new byte[4 * width * height];
 
-                //Console.Clear();
 
                 var count = 0;
-                var countLimit = 300;
+                var countLimit = 5;
                 while (true)
                 {
-                    //Console.SetCursorPosition(0, 0);
                     count++;
                     if (count == countLimit) break;
 
@@ -69,13 +64,12 @@ namespace RevitDoomNetPort
 
                     doom.Update();
                     renderer.Render(doom, buffer, Fixed.Zero);
-                    if (count < countLimit-1) continue;
                     RevitRenderer.ApplyBGRAToRegions(Doc, buffer, width, height, Pixels, Scale);
                 }
             }
             catch (Exception e)
             {
-                //Console.WriteLine("Error: " + e);
+
             }
         }
     }

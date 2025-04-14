@@ -23,16 +23,17 @@ namespace RevitDoom
                 .OfClass(typeof(FilledRegion))
                 .WhereElementIsNotElementType()
                 .Cast<FilledRegion>()
-                .OrderBy(i=>int.Parse(i.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString()))
+                .OrderByDescending(r => GetCentral(r).Y)
+                .ThenBy(r => GetCentral(r).X)
                 .ToList();
-
 
             var builder = new AppBuilder();
             builder.SetIwad(wadPath)
                 .EnableHighResolution(false)
                 .WithArgs("-skill", "3")
                 .WithScale(1)
-                .WithPixels(pixels);
+                .WithPixels(pixels)
+                .WithUIDocument(uidoc);
 
             var dapp = builder.Build();
             dapp.Run();
@@ -40,5 +41,11 @@ namespace RevitDoom
 
             return Result.Succeeded;
         }
+        private XYZ GetCentral(FilledRegion filledRegion)
+        {
+            var bb = filledRegion.get_BoundingBox(null);
+            return (bb.Min + bb.Max) / 2;
+        }
     }
+
 }

@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using RevitDoomNetPort;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,7 @@ namespace RevitDoom
         private string[] _extraArgs = Array.Empty<string>();
         private uint _scale = 1;
         private Document _doc = null;
+        private UIDocument _uidoc = null;
         private IList<FilledRegion> _pixels;
 
         public AppBuilder SetIwad(string path)
@@ -45,6 +47,12 @@ namespace RevitDoom
             return this;
         }
 
+        public AppBuilder WithUIDocument(UIDocument uIDocument)
+        {
+            _uidoc = uIDocument;
+            return this;
+        }
+
         public DoomApp Build()
         {
             return new DoomApp()
@@ -54,6 +62,7 @@ namespace RevitDoom
                 ExtraArgs = _extraArgs,
                 Scale = _scale,
                 Doc = _doc,
+                Uidoc = _uidoc,
                 Pixels = _pixels
             };
         }

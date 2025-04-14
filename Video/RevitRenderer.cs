@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 
@@ -14,23 +15,20 @@ namespace RevitDoom.Video
             using (var trans = new Transaction(doc, "Update FilledRegion Colors"))
             {
                 trans.Start();
-                //var indexer = 0;
+
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
                         int index = y * width + x;
-                        //int index = y + x;
-
                         int i = (x * height + y) * 4;
 
-                        byte b = buffer[i + 0];
+                        byte r = buffer[i + 0];
                         byte g = buffer[i + 1];
-                        byte r = buffer[i + 2];
+                        byte b = buffer[i + 2];
 
                         var color = new Color(r, g, b);
                         ApplyColorToRegion(doc, regions[index], color);
-                        //indexer++;
                     }
                 }
 
@@ -43,7 +41,6 @@ namespace RevitDoom.Video
             var overrideSettings = new OverrideGraphicSettings();
             overrideSettings.SetSurfaceForegroundPatternColor(color);
             overrideSettings.SetSurfaceForegroundPatternId(GetSolidFillPatternId(doc));
-
             doc.ActiveView.SetElementOverrides(region.Id, overrideSettings);
         }
 
@@ -58,6 +55,18 @@ namespace RevitDoom.Video
             }
 
             throw new InvalidOperationException("Не найден Solid Fill Pattern.");
+        }
+
+        public static void RefreshActiveViewByNudge(this UIDocument uidoc, XYZ nudge)
+        {
+            View view = uidoc.ActiveView;
+            using (Transaction t = new Transaction(uidoc.Document, "Nudge view"))
+            {
+                t.Start();
+                ElementTransformUtils.MoveElement(uidoc.Document, view.Id, nudge);
+                ElementTransformUtils.MoveElement(uidoc.Document, view.Id, -nudge);
+                t.Commit();
+            }
         }
     }
 
