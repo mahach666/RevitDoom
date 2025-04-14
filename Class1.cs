@@ -23,7 +23,7 @@ namespace RevitDoom
                 .OfClass(typeof(FilledRegion))
                 .WhereElementIsNotElementType()
                 .Cast<FilledRegion>()
-                .OrderBy(i=>i.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS))
+                .OrderBy(i=>i.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString())
                 .ToList();
 
 
@@ -38,7 +38,7 @@ namespace RevitDoom
             dapp.Run();
 
 
-            return Result.Cancelled;
+            return Result.Succeeded;
         }
     }
 }

@@ -54,9 +54,14 @@ namespace RevitDoomNetPort
 
                 //Console.Clear();
 
+                var count = 0;
+
                 while (true)
                 {
                     //Console.SetCursorPosition(0, 0);
+                    count++;
+                    if (count == 10) break;
+
 
                     if (doom.Menu.Active || doom.State != DoomState.Game)
                     {
