@@ -55,13 +55,12 @@ namespace RevitDoomNetPort
                 //Console.Clear();
 
                 var count = 0;
-
+                var countLimit = 300;
                 while (true)
                 {
                     //Console.SetCursorPosition(0, 0);
                     count++;
-                    if (count == 300) break;
-                    if (count < 299) continue;
+                    if (count == countLimit) break;
 
                     if (doom.Menu.Active || doom.State != DoomState.Game)
                     {
@@ -70,6 +69,7 @@ namespace RevitDoomNetPort
 
                     doom.Update();
                     renderer.Render(doom, buffer, Fixed.Zero);
+                    if (count < countLimit-1) continue;
                     RevitRenderer.ApplyBGRAToRegions(Doc, buffer, width, height, Pixels, Scale);
                 }
             }

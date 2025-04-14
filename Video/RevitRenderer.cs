@@ -14,12 +14,14 @@ namespace RevitDoom.Video
             using (var trans = new Transaction(doc, "Update FilledRegion Colors"))
             {
                 trans.Start();
-
+                //var indexer = 0;
                 for (int y = 0; y < height; y++)
                 {
                     for (int x = 0; x < width; x++)
                     {
                         int index = y * width + x;
+                        //int index = y + x;
+
                         int i = (x * height + y) * 4;
 
                         byte b = buffer[i + 0];
@@ -28,6 +30,7 @@ namespace RevitDoom.Video
 
                         var color = new Color(r, g, b);
                         ApplyColorToRegion(doc, regions[index], color);
+                        //indexer++;
                     }
                 }
 

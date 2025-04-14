@@ -23,7 +23,7 @@ namespace RevitDoom
                 .OfClass(typeof(FilledRegion))
                 .WhereElementIsNotElementType()
                 .Cast<FilledRegion>()
-                .OrderBy(i=>i.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString())
+                .OrderBy(i=>int.Parse(i.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS).AsString()))
                 .ToList();
 
 
