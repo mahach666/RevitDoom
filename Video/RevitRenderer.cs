@@ -2,6 +2,7 @@
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
+using System.Windows.Threading;
 
 namespace RevitDoom.Video
 {
@@ -29,6 +30,7 @@ namespace RevitDoom.Video
 
                         var color = new Color(r, g, b);
                         ApplyColorToRegion(doc, regions[index], color);
+                        Animator();
                     }
                 }
 
@@ -67,6 +69,11 @@ namespace RevitDoom.Video
                 ElementTransformUtils.MoveElement(uidoc.Document, view.Id, -nudge);
                 t.Commit();
             }
+        }
+
+        public static void Animator()
+        {
+           Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
         }
     }
 

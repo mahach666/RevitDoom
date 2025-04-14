@@ -36,7 +36,7 @@ namespace RevitDoom
                 .WithUIDocument(uidoc);
 
             var dapp = builder.Build();
-            dapp.Run();
+            dapp.RunAsync();
 
 
             return Result.Succeeded;

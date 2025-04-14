@@ -10,8 +10,9 @@ using RevitDoom.Video;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
-namespace RevitDoomNetPort
+namespace RevitDoom
 {
     public class DoomApp
     {
@@ -22,6 +23,14 @@ namespace RevitDoomNetPort
         public Document Doc;
         public UIDocument Uidoc;
         public IList<FilledRegion> Pixels;
+
+        public async Task RunAsync()
+        {
+            var task = new RevitTask();
+
+            await task.Run(app => Run());
+        }
+
         public void Run()
         {
             try
@@ -51,7 +60,7 @@ namespace RevitDoomNetPort
 
 
                 var count = 0;
-                var countLimit = 5;
+                var countLimit = 100;
                 while (true)
                 {
                     count++;
