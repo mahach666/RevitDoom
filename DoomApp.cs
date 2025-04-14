@@ -60,8 +60,8 @@ namespace RevitDoomNetPort
                 {
                     //Console.SetCursorPosition(0, 0);
                     count++;
-                    if (count == 10) break;
-
+                    if (count == 300) break;
+                    if (count < 299) continue;
 
                     if (doom.Menu.Active || doom.State != DoomState.Game)
                     {
