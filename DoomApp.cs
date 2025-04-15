@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace RevitDoom
 {
@@ -28,7 +29,14 @@ namespace RevitDoom
         {
             var task = new RevitTask();
 
-            await task.Run(app => Run());
+            try
+            {
+                await task.Run(app => Run());
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
         }
 
         public void Run()
@@ -60,7 +68,7 @@ namespace RevitDoom
 
 
                 var count = 0;
-                var countLimit = 100;
+                var countLimit = 10;
                 while (true)
                 {
                     count++;
@@ -78,7 +86,7 @@ namespace RevitDoom
             }
             catch (Exception e)
             {
-
+                MessageBox.Show(e.Message);
             }
         }
     }

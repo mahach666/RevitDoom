@@ -30,11 +30,11 @@ namespace RevitDoom.Video
 
                         var color = new Color(r, g, b);
                         ApplyColorToRegion(doc, regions[index], color);
-                        Animator();
                     }
                 }
 
                 trans.Commit();
+                Animator();
             }
         }
 
@@ -73,7 +73,7 @@ namespace RevitDoom.Video
 
         public static void Animator()
         {
-           Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+            Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
         }
     }
 
