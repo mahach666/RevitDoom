@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <PackageReference Include="DoomNetFrameworkEngine" Version="1.0.0" />
+    <PackageReference Include="GenFusionsRevitCore.Servers3dContext" Version="2022.1.0" />
     <PackageReference Include="RevitTask" Version="3.0.0" />
     <PackageReference Include="Revit_All_Main_Versions_API_x64" Version="2022.1.0" />
   </ItemGroup>

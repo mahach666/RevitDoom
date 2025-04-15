@@ -14,7 +14,7 @@ namespace RevitDoom
         private uint _scale = 1;
         private Document _doc = null;
         private UIDocument _uidoc = null;
-        private IList<FilledRegion> _pixels;
+        private IList<XYZ> _pixels;
 
         public AppBuilder SetIwad(string path)
         {
@@ -39,16 +39,21 @@ namespace RevitDoom
             return this;
         }
 
-        public AppBuilder WithPixels(IList<FilledRegion> pixels)
+        public AppBuilder WithPixels(IList<XYZ> pixels)
         {
             _pixels = pixels;
-            _doc = _pixels.FirstOrDefault()?.Document;
             return this;
         }
 
         public AppBuilder WithUIDocument(UIDocument uIDocument)
         {
             _uidoc = uIDocument;
+            return this;
+        }
+
+        public AppBuilder WithDocument(Document uIDocument)
+        {
+            _doc = uIDocument;
             return this;
         }
 

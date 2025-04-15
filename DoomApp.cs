@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.UI;
 using DoomNetFrameworkEngine;
 using DoomNetFrameworkEngine.DoomEntity;
@@ -10,6 +11,7 @@ using RevitDoom.Video;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -23,7 +25,7 @@ namespace RevitDoom
         public uint Scale;
         public Document Doc;
         public UIDocument Uidoc;
-        public IList<FilledRegion> Pixels;
+        public IList<XYZ> Pixels;
 
         public async Task RunAsync()
         {
@@ -68,10 +70,9 @@ namespace RevitDoom
 
 
                 var count = 0;
-                var countLimit = 10;
+                var countLimit = 1;
                 while (true)
                 {
-                    count++;
                     if (count == countLimit) break;
 
                     if (doom.Menu.Active || doom.State != DoomState.Game)
@@ -82,6 +83,11 @@ namespace RevitDoom
                     doom.Update();
                     renderer.Render(doom, buffer, Fixed.Zero);
                     RevitRenderer.ApplyBGRAToRegions(Doc, buffer, width, height, Pixels, Scale);
+
+                    Thread.Sleep(33);
+
+                    //ExApp.appInstance.ServerStateMachine.ClearSolidServers();
+                    count++;
                 }
             }
             catch (Exception e)
