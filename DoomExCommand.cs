@@ -28,7 +28,7 @@ namespace RevitDoom
 
             for (int y = 0; y < 320; y++)
             {
-                for (int x = 0; x < 200; x++)
+                for (int x = 0; x < 1; x++)
                 {
                     var solid = CreateCube(new XYZ(acumX, acumY, 0), boxSize);
 
@@ -36,13 +36,16 @@ namespace RevitDoom
 
                     serverList.Add(server);
 
+                    server.RenderScene(doc.ActiveView, DisplayStyle.Wireframe);
+
                     acumX += boxSize; 
                 }
                 acumY += boxSize;
                 acumX = 0;
             }
+            uidoc.UpdateAllOpenViews();
 
-            RegisterMultiServer(serverList, uidoc, new HashSet<Document>() { doc });
+            //RegisterMultiServer(serverList, uidoc, new HashSet<Document>() { doc });
 
             //UnregisterAllServers(new HashSet<Document>() { doc });
 
