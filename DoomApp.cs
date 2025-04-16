@@ -26,6 +26,9 @@ namespace RevitDoom
         public Document Doc;
         public UIDocument Uidoc;
         public IList<XYZ> Pixels;
+        public Reference ReferenceObj;
+        public Face FaceObj;
+
 
         public async Task RunAsync()
         {
@@ -82,9 +85,11 @@ namespace RevitDoom
 
                     doom.Update();
                     renderer.Render(doom, buffer, Fixed.Zero);
-                    RevitRenderer.ApplyBGRAToRegions(Doc, buffer, width, height, Pixels, Scale);
 
-                    Thread.Sleep(33);
+                    //RevitRenderer.ApplyBGRAToRegions(Doc, buffer, width, height, Pixels, Scale);
+                    RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView,FaceObj,ReferenceObj, buffer, width, height, Scale);
+
+                    //Thread.Sleep(33);
 
                     //ExApp.appInstance.ServerStateMachine.ClearSolidServers();
                     count++;

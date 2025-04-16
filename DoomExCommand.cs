@@ -3,9 +3,11 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
 using Autodesk.Revit.UI;
+using RevitDoom.Utils;
 using RevitDoom.Video;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RevitDoom
 {
@@ -18,7 +20,6 @@ namespace RevitDoom
             var uiApp = commandData.Application;
             var uidoc = uiApp.ActiveUIDocument;
             var doc = uidoc.Document;
-
 
             //var serverList = new List<SolidServer>();
 
@@ -43,40 +44,49 @@ namespace RevitDoom
             //}
             //uidoc.UpdateAllOpenViews();
 
-
-
             //RegisterMultiServer(serverList, uidoc, new HashSet<Document>() { doc });
 
             //UnregisterAllServers(new HashSet<Document>() { doc });
 
+            var myFloor = doc.GetElement(new ElementId(264061));
+            //var myFloor = doc.GetElement(new ElementId(264291));
 
-            //var wadPath = UserSelect.GetWad();
+            ElementId elemId = myFloor.Id;
 
-            //if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
+            Reference faceRef = HostObjectUtils.GetTopFaces((HostObject)myFloor).First();
 
+            Face face = ((HostObject)myFloor).get_Geometry(new Options()).OfType<Solid>()
+                .SelectMany(s => s.Faces.Cast<Face>()).FirstOrDefault();
 
-            //var pixels = new List<XYZ>(320 * 200);
+            var wadPath = UserSelect.GetWad();
 
-            //for (int y = 0; y < 200; y++)
-            //{
-            //    for (int x = 0; x < 320; x++)
-            //    {
-            //        pixels.Add(new XYZ(x, y, 0));
-            //    }
-            //}
+            if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
 
 
-            //var builder = new AppBuilder();
-            //builder.SetIwad(wadPath)
-            //    .EnableHighResolution(false)
-            //    .WithArgs("-skill", "3")
-            //    .WithScale(1)
-            //    .WithPixels(pixels)
-            //    .WithDocument(doc)
-            //    .WithUIDocument(uidoc);
+            var pixels = new List<XYZ>(320 * 200);
 
-            //var dapp = builder.Build();
-            //dapp.Run();
+            for (int y = 0; y < 200; y++)
+            {
+                for (int x = 0; x < 320; x++)
+                {
+                    pixels.Add(new XYZ(x, y, 0));
+                }
+            }
+
+
+            var builder = new AppBuilder();
+            builder.SetIwad(wadPath)
+                .EnableHighResolution(false)
+                .WithArgs("-skill", "3")
+                .WithScale(1)
+                .WithPixels(pixels)
+                .WithDocument(doc)
+                .WithUIDocument(uidoc)
+                .WithReferenceObj(faceRef)
+                .WithFaceObj(face);
+
+            var dapp = builder.Build();
+            dapp.Run();
 
 
             return Result.Succeeded;

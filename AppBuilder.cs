@@ -15,6 +15,8 @@ namespace RevitDoom
         private Document _doc = null;
         private UIDocument _uidoc = null;
         private IList<XYZ> _pixels;
+        private Reference _referenceObj;
+        private Face _faceObj;
 
         public AppBuilder SetIwad(string path)
         {
@@ -56,6 +58,17 @@ namespace RevitDoom
             _doc = uIDocument;
             return this;
         }
+        public AppBuilder WithReferenceObj(Reference referenceObj)
+        {
+            _referenceObj = referenceObj;
+            return this;
+        }
+
+        public AppBuilder WithFaceObj(Face faceObj)
+        {
+            _faceObj = faceObj;
+            return this;
+        }
 
         public DoomApp Build()
         {
@@ -67,7 +80,9 @@ namespace RevitDoom
                 Scale = _scale,
                 Doc = _doc,
                 Uidoc = _uidoc,
-                Pixels = _pixels
+                Pixels = _pixels,
+                ReferenceObj = _referenceObj,
+                FaceObj = _faceObj
             };
         }
     }
