@@ -7,6 +7,7 @@ using DoomNetFrameworkEngine.DoomEntity.Game;
 using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.Video;
 using RevitDoom.UserInput;
+using RevitDoom.Utils;
 using RevitDoom.Video;
 using System;
 using System.Collections.Generic;
@@ -73,9 +74,10 @@ namespace RevitDoom
 
 
                 var count = 0;
-                var countLimit = 1;
+                var countLimit = 300;
                 while (true)
                 {
+
                     if (count == countLimit) break;
 
                     if (doom.Menu.Active || doom.State != DoomState.Game)
@@ -86,14 +88,18 @@ namespace RevitDoom
                     doom.Update();
                     renderer.Render(doom, buffer, Fixed.Zero);
 
-                    //RevitRenderer.ApplyBGRAToRegions(Doc, buffer, width, height, Pixels, Scale);
-                    RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView,FaceObj,ReferenceObj, buffer, width, height, Scale);
+                    count++;
 
-                    //Thread.Sleep(33);
+                    if (count < countLimit - 10) continue;
+                    RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView, FaceObj, ReferenceObj, buffer.Reverse().ToArray(), width, height, Scale);
+                    //Uidoc.UpdateAllOpenViews();
+                    Uidoc.RefreshActiveView();
+                    //TaskDialog.Show("Info", "Обновление...");
+
 
                     //ExApp.appInstance.ServerStateMachine.ClearSolidServers();
-                    count++;
                 }
+                AnalysisService._bufer = buffer;
             }
             catch (Exception e)
             {

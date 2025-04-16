@@ -1,8 +1,10 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Analysis;
 using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Events;
 using RevitDoom.Utils;
 using RevitDoom.Video;
 using System;
@@ -48,15 +50,38 @@ namespace RevitDoom
 
             //UnregisterAllServers(new HashSet<Document>() { doc });
 
-            var myFloor = doc.GetElement(new ElementId(264061));
-            //var myFloor = doc.GetElement(new ElementId(264291));
+            //var myFloor = doc.GetElement(new ElementId(264061));
+            //Reference faceRef = HostObjectUtils.GetTopFaces((HostObject)myFloor).First();
+            //Face face = ((HostObject)myFloor).get_Geometry(new Options()).OfType<Solid>()
+            //    .SelectMany(s => s.Faces.Cast<Face>()).FirstOrDefault();
 
-            ElementId elemId = myFloor.Id;
 
-            Reference faceRef = HostObjectUtils.GetTopFaces((HostObject)myFloor).First();
-
+            var myFloor = doc.GetElement(new ElementId(264847));
+            Reference faceRef = HostObjectUtils.GetSideFaces((HostObject)myFloor, ShellLayerType.Interior).First();
             Face face = ((HostObject)myFloor).get_Geometry(new Options()).OfType<Solid>()
                 .SelectMany(s => s.Faces.Cast<Face>()).FirstOrDefault();
+
+
+            //          using (Transaction t = new Transaction(uidoc.Document, "Nudge view"))
+            //          {
+            //              t.Start();
+            //              SpatialFieldManager sfm
+            //= SpatialFieldManager.GetSpatialFieldManager(
+            //  view);
+
+            //              if (null != sfm && 0 < AnalysisService._sfp_index)
+            //              {
+            //                  sfm.RemoveSpatialFieldPrimitive(
+            //                    AnalysisService._sfp_index);
+
+            //                  AnalysisService._sfp_index = -1;
+            //              }
+
+            //              AnalysisService.SetAnalysisDisplayStyle(doc);
+            //              t.Commit();
+            //          }
+
+
 
             var wadPath = UserSelect.GetWad();
 

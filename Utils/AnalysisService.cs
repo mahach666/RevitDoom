@@ -1,30 +1,43 @@
 ﻿using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Analysis;
+using Autodesk.Revit.DB.ExtensibleStorage;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using DoomNetFrameworkEngine.DoomEntity.MathUtils;
+using DoomNetFrameworkEngine.DoomEntity;
+using DoomNetFrameworkEngine.Video;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using DoomNetFrameworkEngine.DoomEntity.Game;
+using DoomNetFrameworkEngine;
+using RevitDoom.UserInput;
 
 namespace RevitDoom.Utils
 {
-    internal class AnalysisService
+    public class AnalysisService
     {
-        static DateTime _lastUpdate = DateTime.Now.Subtract(_interval);
-        static TimeSpan _interval = new TimeSpan(0, 0, 0, 0, 5000);
-        const int _width = 320;
-        const int _height = 200;
-        static byte[] _lastHash = null;
+        public static DateTime _lastUpdate = DateTime.Now.Subtract(_interval);
+        public static TimeSpan _interval = new TimeSpan(0, 0, 0, 0, 5000);
+        public const int _width = 320;
+        public const int _height = 200;
+        public static byte[] _lastHash = null;
 
-        static byte[] _bufer = null;
+        public static byte[] _bufer = null;
 
-        static int _sfp_index = -1;
-        static Reference _faceReference = null;
+        public static int _sfp_index = -1;
+        public static Reference _faceReference = null;
 
 
-        void SetAnalysisDisplayStyle(Document doc)
+        public static string IwadPath;
+        public static string[] ExtraArgs;
+
+        static Doom _doom;
+        static Renderer _renderer;
+
+        public static void SetAnalysisDisplayStyle(Document doc)
         {
             AnalysisDisplayStyle analysisDisplayStyle;
 
@@ -176,14 +189,44 @@ namespace RevitDoom.Utils
             string dt = DateTime.Now.ToString("u");
             Debug.Print(dt + " " + msg);
         }
-        static void OnIdling(
-      object sender,
-      IdlingEventArgs e)
+        public static void OnIdling(
+       object sender,
+       IdlingEventArgs e)
         {
             if (DateTime.Now.Subtract(_lastUpdate)
-              > _interval)
+            > _interval)
             {
                 Log("OnIdling");
+
+                if (_doom == null)
+                {
+                    var argsList = new[] { "-iwad", IwadPath };
+                    if (ExtraArgs.Length > 0)
+                    {
+                        argsList = new string[] { "-iwad", IwadPath }.Concat(ExtraArgs).ToArray();
+                    }
+
+                    var cmdArgs = new CommandLineArgs(argsList);
+                    var config = new Config();
+                    config.video_highresolution = false;
+                    var content = new GameContent(cmdArgs);
+
+                    ConsoleUserInput input = null;
+                    Doom doom = null;
+
+                    input = new ConsoleUserInput(config, e => doom?.PostEvent(e));
+                    _doom = new Doom(cmdArgs, config, content, null, null, null, input);
+
+                    _renderer = new Renderer(config, content);
+
+                    int width = _renderer.Width;
+                    int height = _renderer.Height;
+                    _bufer = new byte[4 * width * height];
+                }
+
+                _doom.Update();
+                _renderer.Render(_doom, _bufer, Fixed.Zero);
+
 
                 GreyscaleBitmapData data
                   = new GreyscaleBitmapData(
@@ -191,84 +234,78 @@ namespace RevitDoom.Utils
 
                 byte[] hash = data.HashValue;
 
-                if (null == _lastHash
-                  || 0 != CompareBytes(hash, _lastHash))
+                _lastHash = hash;
+
+
+                UIApplication uiapp = sender as UIApplication;
+                UIDocument uidoc = uiapp.ActiveUIDocument;
+                Document doc = uidoc.Document;
+
+                Log("OnIdling image changed, active document "
+                  + doc.Title);
+
+
+                View view = doc.ActiveView; // maybe has to be 3D
+
+                SpatialFieldManager sfm
+                  = SpatialFieldManager.GetSpatialFieldManager(
+                    view);
+
+                if (null == sfm)
                 {
-                    _lastHash = hash;
+                    sfm = SpatialFieldManager
+                      .CreateSpatialFieldManager(view, 1);
+                }
 
-                    // access active document from sender:
+                if (0 > _sfp_index)
+                {
+                    _sfp_index = sfm.AddSpatialFieldPrimitive(
+                      _faceReference);
+                }
 
-                    Application app = sender as Application;
+                int nPoints = data.Width * data.Height;
 
-                    Debug.Assert(null != app,
-                      "expected a valid Revit application instance");
+                IList<UV> pts = new List<UV>(nPoints);
 
-                    UIApplication uiapp = new UIApplication(app);
-                    UIDocument uidoc = uiapp.ActiveUIDocument;
-                    Document doc = uidoc.Document;
+                IList<ValueAtPoint> valuesAtPoints
+                  = new List<ValueAtPoint>(nPoints);
 
-                    Log("OnIdling image changed, active document "
-                      + doc.Title);
+                //Face face = _faceReference.GeometryObject
+                //  as Face;
+                var myFloor = doc.GetElement(_faceReference.ElementId);
 
-                    Transaction transaction
-                      = new Transaction(doc, "Revit Webcam Update");
+                Face face = ((HostObject)myFloor).get_Geometry(new Options()).OfType<Solid>()
+            .SelectMany(s => s.Faces.Cast<Face>()).FirstOrDefault();
 
-                    transaction.Start();
+                GetFieldPointsAndValues(ref pts,
+                  ref valuesAtPoints, ref data, face);
 
-                    View view = doc.ActiveView; // maybe has to be 3D
+                AnalysisResultSchema resultSchema = new AnalysisResultSchema("My Webcam Data", "Webcam");
 
-                    SpatialFieldManager sfm
-                      = SpatialFieldManager.GetSpatialFieldManager(
-                        view);
+                //int resultIndex = sfm.RegisterResult(resultSchema);
 
-                    if (null == sfm)
-                    {
-                        sfm = SpatialFieldManager
-                          .CreateSpatialFieldManager(view, 1);
-                    }
+                var schema = sfm.GetRegisteredResults()
+    .Select(id => sfm.GetResultSchema(id))
+    .FirstOrDefault(s => s.Name == "DOOM_FRAME");
 
-                    if (0 > _sfp_index)
-                    {
-                        _sfp_index = sfm.AddSpatialFieldPrimitive(
-                          _faceReference);
-                    }
+                int schemaIndex = schema != null
+                    ? sfm.GetRegisteredResults().First(id => sfm.GetResultSchema(id).Name == "DOOM_FRAME")
+                    : sfm.RegisterResult(new AnalysisResultSchema("DOOM_FRAME", "RevitDoom"));
 
-                    int nPoints = data.Width * data.Height;
-
-                    IList<UV> pts = new List<UV>(nPoints);
-
-                    IList<ValueAtPoint> valuesAtPoints
-                      = new List<ValueAtPoint>(nPoints);
-
-                    //Face face = _faceReference.GeometryObject
-                    //  as Face;
-                    var myFloor = doc.GetElement(_faceReference.ElementId);
-
-                    Face face = ((HostObject)myFloor).get_Geometry(new Options()).OfType<Solid>()
-                .SelectMany(s => s.Faces.Cast<Face>()).FirstOrDefault();
-
-                    GetFieldPointsAndValues(ref pts,
-                      ref valuesAtPoints, ref data, face);
-
-                    AnalysisResultSchema resultSchema = new AnalysisResultSchema("My Webcam Data", "Webcam");
-
-                    int resultIndex = sfm.RegisterResult(resultSchema);
-
-
-                    FieldDomainPointsByUV fieldPoints
+                FieldDomainPointsByUV fieldPoints
                       = new FieldDomainPointsByUV(pts);
 
-                    FieldValues fieldValues
-                      = new FieldValues(valuesAtPoints);
+                FieldValues fieldValues
+                  = new FieldValues(valuesAtPoints);
 
-                    sfm.UpdateSpatialFieldPrimitive(
-                      _sfp_index, fieldPoints, fieldValues, resultIndex);
+                sfm.UpdateSpatialFieldPrimitive(
+                  _sfp_index, fieldPoints, fieldValues, schemaIndex);
 
-                    doc.Regenerate();
-                    transaction.Commit();
+                //doc.Regenerate();
+                //transaction.Commit();
 
-                    _lastUpdate = DateTime.Now;
-                }
+                _lastUpdate = DateTime.Now;
+                //}
             }
         }
 
