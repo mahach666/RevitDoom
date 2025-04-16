@@ -3,7 +3,7 @@ using Autodesk.Revit.DB.DirectContext3D;
 
 namespace RevitDoom.RevitDrow;
 
-internal abstract class BaseBufferStorage
+public abstract class BaseBufferStorage
 {
     public DisplayStyle DisplayStyle { get; set; }
 

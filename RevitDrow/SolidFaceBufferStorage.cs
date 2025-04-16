@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace RevitDoom.RevitDrow;
 
-internal class SolidFaceBufferStorage : BaseBufferStorage
+public class SolidFaceBufferStorage : BaseBufferStorage
 {
     public readonly List<IndexTriangle> IndexTriangles;
 

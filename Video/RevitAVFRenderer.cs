@@ -1,6 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Analysis;
 using RevitDoom.Utils;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -51,6 +52,12 @@ namespace RevitDoom.Video
             GetFieldPointsAndValues(ref pts,
               ref valuesAtPoints, ref data, face);
 
+            //RemoveEveryNth(pts, 2);
+            //RemoveEveryNth(valuesAtPoints, 2);
+
+
+
+            //valuesAtPoints =valuesAtPoints.Reverse().ToList();
 
             var schema = sfm.GetRegisteredResults()
                         .Select(id => sfm.GetResultSchema(id))
@@ -71,49 +78,49 @@ namespace RevitDoom.Video
         }
 
         static void GetFieldPointsAndValues(
-     ref IList<UV> pts,
-     ref IList<ValueAtPoint> valuesAtPoints,
-     ref GreyscaleBitmapData data,
-     Face face)
+    ref IList<UV> pts,
+    ref IList<ValueAtPoint> valuesAtPoints,
+    ref GreyscaleBitmapData data,
+    Face face)
         {
             BoundingBoxUV bb = face.GetBoundingBox();
 
-            double umin = bb.Min.U;
-            double umax = bb.Max.U;
+            double umin = bb.Min.U + 0.1;
+            double umax = bb.Max.U - 0.1;
             double ustep = (umax - umin) / data.Width;
             double u = umin;
 
-            double v = bb.Min.V;
-            double vmax = bb.Max.V;
+            double v = bb.Min.V + 0.1;
+            double vmax = bb.Max.V - 0.1;
             double vstep = (vmax - v) / data.Height;
 
             List<double> values = new List<double>(1);
 
-            for (int y = 0; y < data.Height; ++y, v += vstep)
+            for (int y = 0; y < data.Height; ++y)
             {
-                Debug.Assert(v < vmax,
-                  "expected v to remain within bounds");
+                double v_current = v + y * vstep;
+
+                Debug.Assert(v_current < vmax, "expected v to remain within bounds");
 
                 u = umin;
 
                 for (int x = 0; x < data.Width; ++x, u += ustep)
                 {
-                    Debug.Assert(u < umax,
-                      "expected u to remain within bounds");
+                    Debug.Assert(u < umax, "expected u to remain within bounds");
 
-                    double brightness = data.GetBrightnessAt(
-                      x, y);
+                    // Зеркальное обращение по вертикали:
+                    double brightness = data.GetBrightnessAt(x, data.Height - 1 - y);
 
-                    UV uv = new UV(u, v);
+                    UV uv = new UV(u, v_current);
                     pts.Add(uv);
 
                     values.Clear();
                     values.Add(brightness);
-                    valuesAtPoints.Add(new ValueAtPoint(
-                      values));
+                    valuesAtPoints.Add(new ValueAtPoint(values));
                 }
             }
         }
+
         public static byte[] Downsample(byte[] input, int factor)
         {
             if (factor <= 1 || input.Length == 0)
@@ -129,6 +136,26 @@ namespace RevitDoom.Video
 
             return result;
         }
+
+        public static void RemoveEveryNth<T>(IList<T> list, int n)
+        {
+            if (n <= 0)
+                throw new ArgumentException("n must be greater than 0");
+
+            int count = 0;
+
+            // Проходим с конца, чтобы индексы не сдвигались при удалении
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                count++;
+
+                if (count % n == 0)
+                {
+                    list.RemoveAt(i);
+                }
+            }
+        }
+
 
     }
 }

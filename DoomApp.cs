@@ -37,7 +37,9 @@ namespace RevitDoom
 
             try
             {
-                await task.Run(app => Run());
+                await task.Run(app =>
+                 Run()
+                );
             }
             catch (Exception e)
             {
@@ -91,9 +93,37 @@ namespace RevitDoom
                     count++;
 
                     if (count < countLimit - 10) continue;
-                    RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView, FaceObj, ReferenceObj, buffer.Reverse().ToArray(), width, height, Scale);
+
+
+                    RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView, FaceObj, ReferenceObj, buffer, width, height, Scale);
                     //Uidoc.UpdateAllOpenViews();
                     Uidoc.RefreshActiveView();
+
+                    //DoomExCommand.UiApp.Application.InvalidateDocumentGraphics(doc);
+
+
+
+                    //using (Transaction t = new Transaction(Doc, "Trigger graphics update"))
+                    //{
+                    //    t.Start();
+
+                    //    // Временно меняем параметр вида (например, масштаб)
+                    //    int oldScale = Doc.ActiveView.Scale;
+                    //    Doc.ActiveView.Scale = oldScale == 100 ? 101 : 100;
+
+                    //    t.Commit();
+                    //}
+
+
+
+                    //DoomExCommand.UiApp.PostCommand(RevitCommandId.LookupPostableCommandId(PostableCommand.ActivateView));
+
+                    //var commandId = RevitCommandId.LookupPostableCommandId("ID_ZOOM_TO_FIT");
+                    //uiApp.PostCommand(commandId);
+
+
+                    //Uidoc.ShowElements(ReferenceObj.ElementId);
+
                     //TaskDialog.Show("Info", "Обновление...");
 
 

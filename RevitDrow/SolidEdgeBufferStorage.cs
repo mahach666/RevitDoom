@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace RevitDoom.RevitDrow;
 
-internal class SolidEdgeBufferStorage : BaseBufferStorage
+public class SolidEdgeBufferStorage : BaseBufferStorage
 {
     public readonly List<IndexLine> IndexLines;
 
