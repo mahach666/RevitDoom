@@ -2,7 +2,6 @@
 using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
 using Autodesk.Revit.UI;
-using RevitDoom.Video;
 using System;
 using System.Collections.Generic;
 

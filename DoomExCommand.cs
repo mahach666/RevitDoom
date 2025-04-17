@@ -1,21 +1,18 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Analysis;
-using Autodesk.Revit.DB.DirectContext3D;
-using Autodesk.Revit.DB.ExternalService;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using RevitDoom.Utils;
-using RevitDoom.Video;
-using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Windows.Forms;
+using static DoomNetFrameworkEngine.DoomEntity.World.StatusBar;
 
 namespace RevitDoom
 {
     [Transaction(TransactionMode.Manual)]
     public class DoomExCommand : IExternalCommand
     {
+        public static FlatFaceServer Server;
+
         static public UIApplication UiApp;
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
@@ -38,7 +35,12 @@ namespace RevitDoom
             //var server = new SolidServer(uidoc, solid, true, new ColorWithTransparency(255, 165, 0, 0), new ColorWithTransparency(255, 255, 255, 0));
             //var server = new SolidServer(uidoc, 320, 200,0.1);
 
-            var server = new FlatFaceServer(uidoc, 320, 200, 0.1);
+            var wadPath = UserSelect.GetWad();
+
+            if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
+
+
+            Server = new FlatFaceServer(uidoc, 320, 200, 0.1);
 
 
 
@@ -49,10 +51,10 @@ namespace RevitDoom
             //    acumY += boxSize;
             //    acumX = 0;
             //}
+
             uidoc.UpdateAllOpenViews();
 
-            RevitServices.RegisterServer(server, uidoc, new HashSet<Document>() { doc });
-
+            RevitServices.RegisterServer(Server, uidoc, new HashSet<Document>() { doc });
             //RevitServices.UnregisterAllServers(new HashSet<Document>() { doc });
 
 
@@ -84,9 +86,6 @@ namespace RevitDoom
 
 
 
-            //var wadPath = UserSelect.GetWad();
-
-            //if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
 
 
             //var pixels = new List<XYZ>(320 * 200);
@@ -111,8 +110,20 @@ namespace RevitDoom
             //    .WithReferenceObj(faceRef)
             //    .WithFaceObj(face);
 
-            //var dapp = builder.Build();
-            //dapp.RunAsync();
+            var builder = new AppBuilder();
+            builder.SetIwad(wadPath)
+                .EnableHighResolution(false)
+                .WithArgs("-skill", "3")
+                .WithScale(1)
+                .WithDocument(doc)
+                .WithUIDocument(uidoc);
+
+            var dapp = builder.Build();
+            dapp.Run();
+
+            MessageBox.Show("тут");
+
+            RevitServices.UnregisterAllServers(new HashSet<Document>() { doc });
 
 
             return Result.Succeeded;

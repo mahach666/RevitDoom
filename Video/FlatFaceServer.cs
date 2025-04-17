@@ -10,6 +10,7 @@ using System.Linq;
 public class FlatFaceServer : IDirectContext3DServer, IExternalServer
 {
     private Guid m_guid = Guid.NewGuid();
+    
     private UIDocument m_uiDocument;
 
     private List<FaceData> faces = new();
@@ -50,6 +51,51 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
         }
     }
 
+    //public void SetPixels(byte[] buffer, int width, int height)
+    //{
+    //    int stride = 4; // BGRA
+    //    for (int y = 0; y < height; y++)
+    //    {
+    //        for (int x = 0; x < width; x++)
+    //        {
+    //            int index = (y * width + x) * stride;
+    //            if (index + 3 >= buffer.Length) continue;
+
+    //            byte b = buffer[index + 0];
+    //            byte g = buffer[index + 1];
+    //            byte r = buffer[index + 2];
+    //            byte a = buffer[index + 3];
+
+    //            var color = new ColorWithTransparency(r, g, b, (byte)(255 - a));
+    //            SetPixel(x, height - y - 1, width, color); // y перевернутый
+    //        }
+    //    }
+    //}
+
+    public void SetPixels(byte[] buffer, int width, int height)
+    {
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                // Doom отдаёт данные "по столбцам", а не по строкам
+                int i = (x * height + y) * 4;
+                if (i + 2 >= buffer.Length) continue;
+
+                byte r = buffer[i + 0];
+                byte g = buffer[i + 1];
+                byte b = buffer[i + 2];
+                // byte a = buffer[i + 3]; // Можно игнорировать или использовать
+
+                var color = new ColorWithTransparency(r, g, b, 0);
+
+                SetPixel(x, height - y - 1, width, color); // Y инвертируем для Revit
+            }
+        }
+    }
+
+
+
     private MeshData CreateQuad(XYZ origin, double size)
     {
         var mesh = new MeshData();
@@ -73,29 +119,40 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
 
     public void RenderScene(View view, DisplayStyle style)
     {
-        foreach (var data in faces)
+        try
         {
-            if (data.FaceBuffer == null)
+            foreach (var data in faces)
             {
-                data.FaceBuffer = new MeshFaceBufferStorage(style, data.Mesh);
-                data.FaceBuffer.AddVertexPositionNormalColored(data.FaceColor);
+                if (data.FaceBuffer == null)
+                {
+                    data.FaceBuffer = new MeshFaceBufferStorage(style, data.Mesh);
+                    data.FaceBuffer.AddVertexPositionNormalColored(data.FaceColor);
+                }
+
+                if (data.EdgeBuffer == null)
+                {
+                    data.EdgeBuffer = new MeshEdgeBufferStorage(style, data.Mesh);
+                    data.EdgeBuffer.AddVertexPosition(data.EdgeColor);
+                }
+
+                DrawContext.FlushBuffer(data.FaceBuffer.VertexBuffer, data.FaceBuffer.VertexBufferCount,
+                    data.FaceBuffer.IndexBuffer, data.FaceBuffer.IndexBufferCount, data.FaceBuffer.VertexFormat,
+                    data.FaceBuffer.EffectInstance, data.FaceBuffer.BufferPrimitiveType, 0,
+                    data.FaceBuffer.PrimitiveCount);
+
+                DrawContext.FlushBuffer(data.EdgeBuffer.VertexBuffer, data.EdgeBuffer.VertexBufferCount,
+                    data.EdgeBuffer.IndexBuffer, data.EdgeBuffer.IndexBufferCount, data.EdgeBuffer.VertexFormat,
+                    data.EdgeBuffer.EffectInstance, data.EdgeBuffer.BufferPrimitiveType, 0,
+                    data.EdgeBuffer.PrimitiveCount);
             }
+        }
+        catch 
+        {
 
-            if (data.EdgeBuffer == null)
-            {
-                data.EdgeBuffer = new MeshEdgeBufferStorage(style, data.Mesh);
-                data.EdgeBuffer.AddVertexPosition(data.EdgeColor);
-            }
+        }
+        finally
+        {
 
-            DrawContext.FlushBuffer(data.FaceBuffer.VertexBuffer, data.FaceBuffer.VertexBufferCount,
-                data.FaceBuffer.IndexBuffer, data.FaceBuffer.IndexBufferCount, data.FaceBuffer.VertexFormat,
-                data.FaceBuffer.EffectInstance, data.FaceBuffer.BufferPrimitiveType, 0,
-                data.FaceBuffer.PrimitiveCount);
-
-            DrawContext.FlushBuffer(data.EdgeBuffer.VertexBuffer, data.EdgeBuffer.VertexBufferCount,
-                data.EdgeBuffer.IndexBuffer, data.EdgeBuffer.IndexBufferCount, data.EdgeBuffer.VertexFormat,
-                data.EdgeBuffer.EffectInstance, data.EdgeBuffer.BufferPrimitiveType, 0,
-                data.EdgeBuffer.PrimitiveCount);
         }
     }
 

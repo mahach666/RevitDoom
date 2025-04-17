@@ -95,9 +95,23 @@ namespace RevitDoom
                     if (count < countLimit - 10) continue;
 
 
-                    RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView, FaceObj, ReferenceObj, buffer, width, height, Scale);
+                    //RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView, FaceObj, ReferenceObj, buffer, width, height, Scale);
+
+                    DoomExCommand.Server.SetPixels(buffer, width, height);
+
+                    //var view = Uidoc.ActiveView;
+                    //using (Transaction t = new Transaction(Doc, "Trigger view update"))
+                    //{
+                    //    t.Start();
+                    //    int s = view.Scale;
+                    //    view.Scale = s == 100 ? 101 : 100;
+                    //    view.Scale = s;
+                    //    t.Commit();
+                    //}
+
+
                     //Uidoc.UpdateAllOpenViews();
-                    Uidoc.RefreshActiveView();
+                    //Uidoc.RefreshActiveView();
 
                     //DoomExCommand.UiApp.Application.InvalidateDocumentGraphics(doc);
 
@@ -124,7 +138,7 @@ namespace RevitDoom
 
                     //Uidoc.ShowElements(ReferenceObj.ElementId);
 
-                    //TaskDialog.Show("Info", "Обновление...");
+                    TaskDialog.Show("Info", "Обновление...");
 
 
                     //ExApp.appInstance.ServerStateMachine.ClearSolidServers();
