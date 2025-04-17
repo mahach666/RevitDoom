@@ -1,0 +1,122 @@
+﻿using Autodesk.Revit.DB.DirectContext3D;
+using Autodesk.Revit.DB.ExternalService;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using System.Collections.Generic;
+using System;
+using RevitDoom.RevitDrow;
+using System.Linq;
+
+public class FlatFaceServer : IDirectContext3DServer, IExternalServer
+{
+    private Guid m_guid = Guid.NewGuid();
+    private UIDocument m_uiDocument;
+
+    private List<FaceData> faces = new();
+
+    public FlatFaceServer(UIDocument uiDoc, int width, int height, double cellSize)
+    {
+        m_uiDocument = uiDoc;
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                XYZ origin = new XYZ(x * cellSize, y * cellSize, 0);
+
+                MeshData mesh = CreateQuad(origin, cellSize);
+                var color = new ColorWithTransparency(0, 0, 0, 0); // чёрный непрозрачный
+                var edgeColor = new ColorWithTransparency(255, 255, 255, 0); // белые края
+
+                faces.Add(new FaceData
+                {
+                    Mesh = mesh,
+                    FaceColor = color,
+                    EdgeColor = edgeColor
+                });
+            }
+        }
+    }
+
+    public void SetPixel(int x, int y, int width, ColorWithTransparency color)
+    {
+        int index = y * width + x;
+        if (index >= 0 && index < faces.Count)
+        {
+            faces[index].FaceColor = color;
+            faces[index].EdgeColor = color;
+            faces[index].FaceBuffer = null;
+            faces[index].EdgeBuffer = null;
+        }
+    }
+
+    private MeshData CreateQuad(XYZ origin, double size)
+    {
+        var mesh = new MeshData();
+
+        XYZ p0 = origin;
+        XYZ p1 = origin + new XYZ(size, 0, 0);
+        XYZ p2 = origin + new XYZ(size, size, 0);
+        XYZ p3 = origin + new XYZ(0, size, 0);
+
+        mesh.Vertices.Add(p0); // 0
+        mesh.Vertices.Add(p1); // 1
+        mesh.Vertices.Add(p2); // 2
+        mesh.Vertices.Add(p3); // 3
+
+        mesh.Triangles.Add(new IndexTriangle(0, 1, 2));
+        mesh.Triangles.Add(new IndexTriangle(0, 2, 3));
+
+        return mesh;
+    }
+
+
+    public void RenderScene(View view, DisplayStyle style)
+    {
+        foreach (var data in faces)
+        {
+            if (data.FaceBuffer == null)
+            {
+                data.FaceBuffer = new MeshFaceBufferStorage(style, data.Mesh);
+                data.FaceBuffer.AddVertexPositionNormalColored(data.FaceColor);
+            }
+
+            if (data.EdgeBuffer == null)
+            {
+                data.EdgeBuffer = new MeshEdgeBufferStorage(style, data.Mesh);
+                data.EdgeBuffer.AddVertexPosition(data.EdgeColor);
+            }
+
+            DrawContext.FlushBuffer(data.FaceBuffer.VertexBuffer, data.FaceBuffer.VertexBufferCount,
+                data.FaceBuffer.IndexBuffer, data.FaceBuffer.IndexBufferCount, data.FaceBuffer.VertexFormat,
+                data.FaceBuffer.EffectInstance, data.FaceBuffer.BufferPrimitiveType, 0,
+                data.FaceBuffer.PrimitiveCount);
+
+            DrawContext.FlushBuffer(data.EdgeBuffer.VertexBuffer, data.EdgeBuffer.VertexBufferCount,
+                data.EdgeBuffer.IndexBuffer, data.EdgeBuffer.IndexBufferCount, data.EdgeBuffer.VertexFormat,
+                data.EdgeBuffer.EffectInstance, data.EdgeBuffer.BufferPrimitiveType, 0,
+                data.EdgeBuffer.PrimitiveCount);
+        }
+    }
+
+    public Outline GetBoundingBox(View dBView)
+    {
+        if (faces.Count == 0) return new Outline(XYZ.Zero, XYZ.Zero);
+
+        XYZ min = faces[0].Mesh.Vertices.Cast<XYZ>().Aggregate((a, b) => new XYZ(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Min(a.Z, b.Z)));
+        XYZ max = faces[0].Mesh.Vertices.Cast<XYZ>().Aggregate((a, b) => new XYZ(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y), Math.Max(a.Z, b.Z)));
+
+        return new Outline(min, max);
+    }
+
+    public bool UsesHandles() => false;
+    public bool UseInTransparentPass(View view) => true;
+    public bool CanExecute(View view) => true;
+    public Guid GetServerId() => m_guid;
+    public string GetVendorId() => "GenFusions";
+    public ExternalServiceId GetServiceId() => ExternalServices.BuiltInExternalServices.DirectContext3DService;
+    public string GetName() => "Flat Screen Server";
+    public string GetDescription() => "Draws flat quads instead of cubes";
+    public string GetApplicationId() => "";
+    public string GetSourceId() => "";
+}

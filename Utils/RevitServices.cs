@@ -10,7 +10,7 @@ namespace RevitDoom.Utils
 {
     internal static class RevitServices
     {
-        public static void RegisterServer(SolidServer revitServer, UIDocument uidoc, HashSet<Document> documentList)
+        public static void RegisterServer(IDirectContext3DServer revitServer, UIDocument uidoc, HashSet<Document> documentList)
         {
             ExternalService service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService);
             MultiServerService multiServerService = service as MultiServerService;

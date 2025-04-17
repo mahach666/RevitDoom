@@ -26,12 +26,14 @@ public class SolidServer : IDirectContext3DServer, IExternalServer
                 XYZ basePoint = new XYZ(x * cubeSize, y * cubeSize, 0);
                 Solid cube = CreateCube(basePoint, cubeSize);
                 var color = new ColorWithTransparency(0, 0, 0, 0); // черный, непрозрачный
+                var colorE = new ColorWithTransparency(255, 255, 255, 0); // белый, непрозрачный
+
 
                 solids.Add(new SolidData
                 {
                     Solid = cube,
                     FaceColor = color,
-                    EdgeColor = color
+                    EdgeColor = colorE
                 });
             }
         }

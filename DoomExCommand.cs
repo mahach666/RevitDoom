@@ -36,7 +36,10 @@ namespace RevitDoom
             //var solid = SolidCreate.CreateCube(new XYZ(acumX, acumY, 0), boxSize);
 
             //var server = new SolidServer(uidoc, solid, true, new ColorWithTransparency(255, 165, 0, 0), new ColorWithTransparency(255, 255, 255, 0));
-            var server = new SolidServer(uidoc, 50, 80,0.1);
+            //var server = new SolidServer(uidoc, 320, 200,0.1);
+
+            var server = new FlatFaceServer(uidoc, 320, 200, 0.1);
+
 
 
             //        serverList.Add(server);
