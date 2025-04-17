@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System;
 using RevitDoom.RevitDrow;
 using System.Linq;
+using System.Windows.Forms;
+using View = Autodesk.Revit.DB.View;
 
 public class FlatFaceServer : IDirectContext3DServer, IExternalServer
 {
@@ -145,6 +147,7 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
                     data.EdgeBuffer.EffectInstance, data.EdgeBuffer.BufferPrimitiveType, 0,
                     data.EdgeBuffer.PrimitiveCount);
             }
+            //MessageBox.Show("RenderScene");
         }
         catch 
         {
@@ -167,7 +170,7 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
     }
 
     public bool UsesHandles() => false;
-    public bool UseInTransparentPass(View view) => true;
+    public bool UseInTransparentPass(View view) => false;
     public bool CanExecute(View view) => true;
     public Guid GetServerId() => m_guid;
     public string GetVendorId() => "GenFusions";

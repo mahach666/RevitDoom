@@ -72,7 +72,7 @@ namespace RevitDoom
 
         public DoomApp Build()
         {
-            return new DoomApp()
+            var app = new DoomApp()
             {
                 IwadPath = _iwadPath,
                 HighResolution = _highResolution,
@@ -84,6 +84,9 @@ namespace RevitDoom
                 ReferenceObj = _referenceObj,
                 FaceObj = _faceObj
             };
+
+            app.Initialize();
+            return app;
         }
     }
 }

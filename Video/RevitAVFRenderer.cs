@@ -52,8 +52,8 @@ namespace RevitDoom.Video
             GetFieldPointsAndValues(ref pts,
               ref valuesAtPoints, ref data, face);
 
-            //RemoveEveryNth(pts, 2);
-            //RemoveEveryNth(valuesAtPoints, 2);
+            RemoveEveryNth(pts, 2);
+            RemoveEveryNth(valuesAtPoints, 2);
 
 
 

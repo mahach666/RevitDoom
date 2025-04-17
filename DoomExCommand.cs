@@ -2,9 +2,12 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using RevitDoom.Utils;
+using RevitDoom.Views;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using static DoomNetFrameworkEngine.DoomEntity.World.StatusBar;
+using Face = Autodesk.Revit.DB.Face;
 
 namespace RevitDoom
 {
@@ -40,7 +43,7 @@ namespace RevitDoom
             if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
 
 
-            Server = new FlatFaceServer(uidoc, 320, 200, 0.1);
+            Server = new FlatFaceServer(uidoc, 80, 50, 0.2);
 
 
 
@@ -52,9 +55,10 @@ namespace RevitDoom
             //    acumX = 0;
             //}
 
-            uidoc.UpdateAllOpenViews();
+            //uidoc.UpdateAllOpenViews();
 
             RevitServices.RegisterServer(Server, uidoc, new HashSet<Document>() { doc });
+
             //RevitServices.UnregisterAllServers(new HashSet<Document>() { doc });
 
 
@@ -110,6 +114,16 @@ namespace RevitDoom
             //    .WithReferenceObj(faceRef)
             //    .WithFaceObj(face);
 
+            //var builder = new AppBuilder();
+            //builder.SetIwad(wadPath)
+            //    .EnableHighResolution(false)
+            //    .WithArgs("-skill", "3")
+            //    .WithScale(1)
+            //    .WithDocument(doc)
+            //    .WithUIDocument(uidoc)
+            //    .WithReferenceObj(faceRef)
+            //    .WithFaceObj(face);
+
             var builder = new AppBuilder();
             builder.SetIwad(wadPath)
                 .EnableHighResolution(false)
@@ -119,12 +133,13 @@ namespace RevitDoom
                 .WithUIDocument(uidoc);
 
             var dapp = builder.Build();
-            dapp.Run();
+            //dapp.Run();
 
-            MessageBox.Show("тут");
+            //MessageBox.Show("тут");
 
-            RevitServices.UnregisterAllServers(new HashSet<Document>() { doc });
-
+            //RevitServices.UnregisterAllServers(new HashSet<Document>() { doc });
+            var win = new Window1(dapp);
+            win.Show();
 
             return Result.Succeeded;
         }

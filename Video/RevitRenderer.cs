@@ -33,11 +33,11 @@ namespace RevitDoom.Video
                     //ApplyColorToRegion(doc, regions[index], color);
                 }
             }
-                    ExApp.appInstance.ServerStateMachine.DrawPointsCube(doc,
-                                                            regions.ToList(),
-                                                            0.5,
-                                                            new ColorWithTransparency(75, 75, 75, 0),
-                                                            new ColorWithTransparency(75, 75, 75, 0));
+                    //ExApp.appInstance.ServerStateMachine.DrawPointsCube(doc,
+                    //                                        regions.ToList(),
+                    //                                        0.5,
+                    //                                        new ColorWithTransparency(75, 75, 75, 0),
+                    //                                        new ColorWithTransparency(75, 75, 75, 0));
 
             //trans.Commit();
             //}

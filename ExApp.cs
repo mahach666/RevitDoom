@@ -1,6 +1,5 @@
-﻿using Autodesk.Revit.ApplicationServices;
+﻿
 using Autodesk.Revit.UI;
-using GenFusionsRevitCore.Servers3dContext;
 using System;
 using System.Reflection;
 using System.Windows.Forms;
@@ -9,8 +8,8 @@ namespace RevitDoom
 {
     internal class ExApp : IExternalApplication
     {
-        public ServerStateMachine ServerStateMachine { get; private set; }
-        public static ExApp appInstance { get; private set; }
+        //public ServerStateMachine ServerStateMachine { get; private set; }
+        //public static ExApp appInstance { get; private set; }
 
         public Result OnShutdown(UIControlledApplication application)
         {
@@ -23,8 +22,8 @@ namespace RevitDoom
         {
             try
             {
-                appInstance = this;
-                ServerStateMachine = new ServerStateMachine(this);
+                //appInstance = this;
+                //ServerStateMachine = new ServerStateMachine(this);
 
                 string assemblyLocation = Assembly.GetExecutingAssembly().Location;
 

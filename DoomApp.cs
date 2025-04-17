@@ -31,6 +31,43 @@ namespace RevitDoom
         public Face FaceObj;
 
 
+        private Doom _doom;
+        private Renderer _renderer;
+        private byte[] _buffer;
+        private int _width;
+        private int _height;
+
+        public void Initialize()
+        {
+            var argsList = new[] { "-iwad", IwadPath };
+            if (ExtraArgs.Length > 0)
+            {
+                argsList = new string[] { "-iwad", IwadPath }.Concat(ExtraArgs).ToArray();
+            }
+
+            var cmdArgs = new CommandLineArgs(argsList);
+            var config = new Config();
+            config.video_highresolution = HighResolution;
+            var content = new GameContent(cmdArgs);
+
+            ConsoleUserInput input = null;
+            _doom = null;
+
+            input = new ConsoleUserInput(config, e => _doom?.PostEvent(e));
+            _doom = new Doom(cmdArgs, config, content, null, null, null, input);
+
+            _renderer = new Renderer(config, content);
+
+            _width = _renderer.Width;
+            _height = _renderer.Height;
+            _buffer = new byte[4 * _width * _height];
+
+            for (int i = 0; i < 250; i++)
+            {
+                _doom.Update();
+            }
+        }
+
         public async Task RunAsync()
         {
             var task = new RevitTask();
@@ -138,12 +175,37 @@ namespace RevitDoom
 
                     //Uidoc.ShowElements(ReferenceObj.ElementId);
 
-                    TaskDialog.Show("Info", "Обновление...");
+                    //TaskDialog.Show("Info", "Обновление...");
 
 
                     //ExApp.appInstance.ServerStateMachine.ClearSolidServers();
                 }
                 AnalysisService._bufer = buffer;
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+            }
+        }
+        public void NextStep()
+        {
+            try
+            {
+
+                if (_doom.Menu.Active || _doom.State != DoomState.Game)
+                {
+                    //input.PollMenuKeys();
+                }
+
+                _doom.Update();
+                _renderer.Render(_doom, _buffer, Fixed.Zero);
+
+
+                DoomExCommand.Server.SetPixels(_buffer, _width, _height);
+                //RevitAVFRenderer.ApplyBGRAToAnalysisFace(Doc, Doc.ActiveView, FaceObj, ReferenceObj, _buffer, _width, _height, Scale);
+
+
+
             }
             catch (Exception e)
             {
