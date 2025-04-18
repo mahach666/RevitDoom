@@ -76,10 +76,13 @@ namespace RevitDoom.Utils
             ExternalService service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService);
             MultiServerService multiServerService = service as MultiServerService;
 
+            //var a = new List<IExternalServer>();
+
             foreach (Guid registeredServerId in multiServerService.GetRegisteredServerIds())
             {
-                if (multiServerService.GetServer(registeredServerId) is IDirectContext3DServer)
+                if (multiServerService.GetServer(registeredServerId) is IDirectContext3DServer sr)
                 {
+                    //a.Add(sr);
                     multiServerService.RemoveServer(registeredServerId);
                 }
             }

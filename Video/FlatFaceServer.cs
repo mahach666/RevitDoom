@@ -12,7 +12,7 @@ using View = Autodesk.Revit.DB.View;
 public class FlatFaceServer : IDirectContext3DServer, IExternalServer
 {
     private Guid m_guid = Guid.NewGuid();
-    
+
     private UIDocument m_uiDocument;
 
     private List<FaceData> faces = new();
@@ -29,13 +29,13 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
 
                 MeshData mesh = CreateQuad(origin, cellSize);
                 var color = new ColorWithTransparency(0, 0, 0, 0); // чёрный непрозрачный
-                var edgeColor = new ColorWithTransparency(255, 255, 255, 0); // белые края
+                //var edgeColor = new ColorWithTransparency(255, 255, 255, 0); // белые края
 
                 faces.Add(new FaceData
                 {
                     Mesh = mesh,
                     FaceColor = color,
-                    EdgeColor = edgeColor
+                    //EdgeColor = edgeColor
                 });
             }
         }
@@ -47,9 +47,9 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
         if (index >= 0 && index < faces.Count)
         {
             faces[index].FaceColor = color;
-            faces[index].EdgeColor = color;
+            //faces[index].EdgeColor = color;
             faces[index].FaceBuffer = null;
-            faces[index].EdgeBuffer = null;
+            //faces[index].EdgeBuffer = null;
         }
     }
 
@@ -74,27 +74,74 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
     //    }
     //}
 
+
     public void SetPixels(byte[] buffer, int width, int height)
     {
-        for (int y = 0; y < height; y++)
+        int scaleX = 1;
+        int scaleY = 1;
+        int targetHeight = height;
+        int targetWidth = width;
+
+        int srcHeight = height;
+
+        if (faces.Count * 4 == buffer.Length / 4)
         {
-            for (int x = 0; x < width; x++)
+            scaleX = 2;
+            scaleY = 2;
+            targetHeight = height / 2;
+            targetWidth = width / 2;
+        }
+        else if (faces.Count * 16 == buffer.Length / 4)
+        {
+            scaleX = 4;
+            scaleY = 4;
+            targetHeight = height / 4;
+            targetWidth = width / 4;
+        }
+
+        for (int y = 0; y < targetHeight; y++)
+        {
+            for (int x = 0; x < targetWidth; x++)
             {
-                // Doom отдаёт данные "по столбцам", а не по строкам
-                int i = (x * height + y) * 4;
+                int srcX = x * scaleX;
+                int srcY = y * scaleY;
+
+                int i = (srcX * srcHeight + srcY) * 4; // Doom: column-major
+
                 if (i + 2 >= buffer.Length) continue;
 
                 byte r = buffer[i + 0];
                 byte g = buffer[i + 1];
                 byte b = buffer[i + 2];
-                // byte a = buffer[i + 3]; // Можно игнорировать или использовать
 
                 var color = new ColorWithTransparency(r, g, b, 0);
-
-                SetPixel(x, height - y - 1, width, color); // Y инвертируем для Revit
+                SetPixel(x, targetHeight - y - 1, targetWidth, color); // Y инвертирован
             }
         }
     }
+
+
+    //public void SetPixels(byte[] buffer, int width, int height)
+    //{
+    //    for (int y = 0; y < height; y++)
+    //    {
+    //        for (int x = 0; x < width; x++)
+    //        {
+    //            // Doom отдаёт данные "по столбцам", а не по строкам
+    //            int i = (x * height + y) * 4;
+    //            if (i + 2 >= buffer.Length) continue;
+
+    //            byte r = buffer[i + 0];
+    //            byte g = buffer[i + 1];
+    //            byte b = buffer[i + 2];
+    //            // byte a = buffer[i + 3]; // Можно игнорировать или использовать
+
+    //            var color = new ColorWithTransparency(r, g, b, 0);
+
+    //            SetPixel(x, height - y - 1, width, color); // Y инвертируем для Revit
+    //        }
+    //    }
+    //}
 
 
 
@@ -123,6 +170,7 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
     {
         try
         {
+            //var count = 1;
             foreach (var data in faces)
             {
                 if (data.FaceBuffer == null)
@@ -131,26 +179,33 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
                     data.FaceBuffer.AddVertexPositionNormalColored(data.FaceColor);
                 }
 
-                if (data.EdgeBuffer == null)
-                {
-                    data.EdgeBuffer = new MeshEdgeBufferStorage(style, data.Mesh);
-                    data.EdgeBuffer.AddVertexPosition(data.EdgeColor);
-                }
+                //if (data.EdgeBuffer == null)
+                //{
+                //    data.EdgeBuffer = new MeshEdgeBufferStorage(style, data.Mesh);
+                //    data.EdgeBuffer.AddVertexPosition(data.EdgeColor);
+                //}
 
-                DrawContext.FlushBuffer(data.FaceBuffer.VertexBuffer, data.FaceBuffer.VertexBufferCount,
-                    data.FaceBuffer.IndexBuffer, data.FaceBuffer.IndexBufferCount, data.FaceBuffer.VertexFormat,
-                    data.FaceBuffer.EffectInstance, data.FaceBuffer.BufferPrimitiveType, 0,
-                    data.FaceBuffer.PrimitiveCount);
+                DrawContext.FlushBuffer(data.FaceBuffer.VertexBuffer
+                    , data.FaceBuffer.VertexBufferCount,
+                    data.FaceBuffer.IndexBuffer
+                    , data.FaceBuffer.IndexBufferCount
+                    , data.FaceBuffer.VertexFormat,
+                    data.FaceBuffer.EffectInstance
+                    , data.FaceBuffer.BufferPrimitiveType
+                    , 0
+                    , data.FaceBuffer.PrimitiveCount);
 
-                DrawContext.FlushBuffer(data.EdgeBuffer.VertexBuffer, data.EdgeBuffer.VertexBufferCount,
-                    data.EdgeBuffer.IndexBuffer, data.EdgeBuffer.IndexBufferCount, data.EdgeBuffer.VertexFormat,
-                    data.EdgeBuffer.EffectInstance, data.EdgeBuffer.BufferPrimitiveType, 0,
-                    data.EdgeBuffer.PrimitiveCount);
+                //DrawContext.FlushBuffer(data.EdgeBuffer.VertexBuffer, data.EdgeBuffer.VertexBufferCount,
+                //    data.EdgeBuffer.IndexBuffer, data.EdgeBuffer.IndexBufferCount, data.EdgeBuffer.VertexFormat,
+                //    data.EdgeBuffer.EffectInstance, data.EdgeBuffer.BufferPrimitiveType, 0,
+                //    data.EdgeBuffer.PrimitiveCount);
+                //count++;
             }
             //MessageBox.Show("RenderScene");
         }
-        catch 
+        catch (Exception e)
         {
+            //MessageBox.Show(e.Message);
 
         }
         finally
@@ -167,6 +222,25 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
         XYZ max = faces[0].Mesh.Vertices.Cast<XYZ>().Aggregate((a, b) => new XYZ(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y), Math.Max(a.Z, b.Z)));
 
         return new Outline(min, max);
+    }
+
+    public static void RemoveEveryNth<T>(IList<T> list, int n)
+    {
+        if (n <= 0)
+            throw new ArgumentException("n must be greater than 0");
+
+        int count = 0;
+
+        // Проходим с конца, чтобы индексы не сдвигались при удалении
+        for (int i = list.Count - 1; i >= 0; i--)
+        {
+            count++;
+
+            if (count % n == 0)
+            {
+                list.RemoveAt(i);
+            }
+        }
     }
 
     public bool UsesHandles() => false;

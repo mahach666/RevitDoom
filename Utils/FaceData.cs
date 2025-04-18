@@ -5,8 +5,8 @@ public class FaceData
 {
     public MeshData Mesh;
     public ColorWithTransparency FaceColor;
-    public ColorWithTransparency EdgeColor;
+    //public ColorWithTransparency EdgeColor;
 
     public MeshFaceBufferStorage FaceBuffer;
-    public MeshEdgeBufferStorage EdgeBuffer;
+    //public MeshEdgeBufferStorage EdgeBuffer;
 }

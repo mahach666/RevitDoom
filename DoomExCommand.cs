@@ -17,6 +17,8 @@ namespace RevitDoom
         public static FlatFaceServer Server;
 
         static public UIApplication UiApp;
+
+
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             UiApp = commandData.Application;
@@ -43,7 +45,8 @@ namespace RevitDoom
             if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
 
 
-            Server = new FlatFaceServer(uidoc, 80, 50, 0.2);
+            Server = new FlatFaceServer(uidoc, 160, 100, 0.05);
+            //Server = new FlatPointServer(uidoc, 160, 100, 0.00001);
 
 
 
