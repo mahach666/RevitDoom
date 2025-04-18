@@ -81,6 +81,81 @@ public class MeshFaceBufferStorage : BaseBufferStorage
 
         IndexBuffer.Unmap();
     }
+    //public override void AddVertexPositionNormalColored(ColorWithTransparency color)
+    //{
+    //    FormatBits = VertexFormatBits.PositionNormalColored;
+    //    VertexFormat = new VertexFormat(FormatBits);
+    //    EffectInstance = new EffectInstance(FormatBits);
+
+    //    // ... ваш существующий код настройки EffectInstance ...
+
+    //    int sizeInFloats = VertexPositionNormalColored.GetSizeInFloats() * VertexBufferCount;
+    //    VertexBuffer = new VertexBuffer(sizeInFloats);
+    //    VertexBuffer.Map(sizeInFloats);
+    //    var stream = VertexBuffer.GetVertexStreamPositionNormalColored();
+
+    //    // ⬇️ 1. формируем временные списки, чтобы потом сохранить их в SourceVertices
+    //    var tempVerts = new List<VertexPositionNormalColored>();
+    //    var tempIndices = new List<int>();
+
+    //    foreach (var (position, normal) in VerticesWithNormals)
+    //    {
+    //        var v = new VertexPositionNormalColored(position, normal, color);
+    //        stream.AddVertex(v);
+    //        tempVerts.Add(v);
+    //    }
+    //    VertexBuffer.Unmap();
+
+    //    IndexBufferCount = PrimitiveCount * IndexTriangle.GetSizeInShortInts();
+    //    IndexBuffer = new IndexBuffer(IndexBufferCount);
+    //    IndexBuffer.Map(IndexBufferCount);
+    //    var indexStream = IndexBuffer.GetIndexStreamTriangle();
+
+    //    foreach (var tri in IndexTriangles)
+    //    {
+    //        indexStream.AddTriangle(tri);
+    //        // ⬇️ 2. сохраняем индексы как int
+    //        tempIndices.Add(tri.Index0);
+    //        tempIndices.Add(tri.Index1);
+    //        tempIndices.Add(tri.Index2);
+    //    }
+    //    IndexBuffer.Unmap();
+
+    //    // ⬇️ 3. НАКОНЕЦ‑ТО запоминаем исходные данные для TryGetData
+    //    SourceVertices = tempVerts.ToArray();
+    //    SourceIndices = tempIndices.ToArray();
+    //}
+
+    //public  void UpdateVertexColors(ColorWithTransparency color)
+    //{
+    //    if (VertexBuffer == null || VertexBufferCount == 0) return;
+
+    //    // 1) обновляем кеш в памяти – это главное для ScreenFaceBufferStorage
+    //    for (int i = 0; i < SourceVertices.Length; i++)
+    //    {
+    //        var v = SourceVertices[i];
+    //        SourceVertices[i] = new VertexPositionNormalColored(v.Position, v.Normal, color);
+    //    }
+
+    //    // 2) перекладываем в Revit‑буфер, чтобы одиночные Flush() тоже имели правильные цвета
+    //    VertexBuffer.Map(VertexPositionNormalColored.GetSizeInFloats() * VertexBufferCount);
+    //    var stream = VertexBuffer.GetVertexStreamPositionNormalColored();
+    //    foreach (var vtx in SourceVertices)
+    //        stream.AddVertex(vtx);
+    //    VertexBuffer.Unmap();
+
+    //    // 3) обновляем EffectInstance – влияет на освещение в HLR
+    //    EffectInstance.SetColor(color.GetColor());
+    //    EffectInstance.SetDiffuseColor(color.GetColor());
+    //    EffectInstance.SetTransparency((double)color.GetTransparency() / 255.0);
+    //    if (DisplayStyle == DisplayStyle.HLR)
+    //    {
+    //        EffectInstance.SetSpecularColor(color.GetColor());
+    //        EffectInstance.SetAmbientColor(color.GetColor());
+    //        EffectInstance.SetEmissiveColor(color.GetColor());
+    //    }
+    //}
+
 
     public void UpdateVertexColors(ColorWithTransparency color)
     {
@@ -111,27 +186,16 @@ public class MeshFaceBufferStorage : BaseBufferStorage
         }
     }
 
-    //public void UpdateVertexColors(ColorWithTransparency color)
-    //{
-    //    if (VertexBuffer == null || VertexBufferCount == 0)
-    //        return;
+    public VertexPositionNormalColored[] SourceVertices { get; private set; }
+    public int[] SourceIndices { get; private set; }
 
-    //    // ⬇️ прежний формат! ────────────────────────────
-    //    int floats = VertexPositionNormalColored.GetSizeInFloats();
-    //    VertexBuffer.Map(VertexBufferCount * floats);
+    public bool TryGetData(out VertexPositionNormalColored[] vertices, out int[] indices)
+    {
+        vertices = SourceVertices;
+        indices = SourceIndices;
+        return vertices != null && indices != null;
+    }
 
-    //    var stream = VertexBuffer.GetVertexStreamPositionNormalColored();
-
-    //    // ⬇️ берём позиции и нормали из VerticesWithNormals
-    //    foreach (var (pos, norm) in VerticesWithNormals)
-    //        stream.AddVertex(new VertexPositionNormalColored(pos, norm, color));
-
-    //    VertexBuffer.Unmap();
-
-    //    EffectInstance.SetColor(color.GetColor());
-    //    EffectInstance.SetDiffuseColor(color.GetColor());
-    //    EffectInstance.SetTransparency(color.GetTransparency() / 255.0);
-    //}
 
 
     public override void AddVertexPosition()
@@ -153,4 +217,5 @@ public class MeshFaceBufferStorage : BaseBufferStorage
     {
         throw new NotImplementedException();
     }
+
 }

@@ -4,10 +4,6 @@ using Autodesk.Revit.UI;
 using RevitDoom.Utils;
 using RevitDoom.Views;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
-using static DoomNetFrameworkEngine.DoomEntity.World.StatusBar;
-using Face = Autodesk.Revit.DB.Face;
 
 namespace RevitDoom
 {
@@ -32,9 +28,9 @@ namespace RevitDoom
             if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
 
 
-            Server = new FlatFaceServer(uidoc, 80, 50, 0.2);
-            //Server = new FlatFaceServer(uidoc, 160, 100, 0.1);
-            //Server = new FlatFaceServer(uidoc, 320, 200, 0.05);           
+            //Server = new FlatFaceServer(uidoc, 80, 50, 0.1);
+            Server = new FlatFaceServer(uidoc, 160, 100, 0.05);
+            //Server = new FlatFaceServer(uidoc, 320, 200, 0.025);
 
             RevitServices.RegisterServer(Server, uidoc, new HashSet<Document>() { doc });           
 

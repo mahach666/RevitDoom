@@ -18,6 +18,8 @@ namespace RevitDoom.Views
         private int _frameCount = 0;
         private DateTime _lastFpsTime = DateTime.Now;
 
+        private bool _isClose = false;
+
 
         public Window1(DoomApp doomApp)
         {
@@ -32,6 +34,7 @@ namespace RevitDoom.Views
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             RevitServices.UnregisterAllServers(new HashSet<Document>() { _doomApp.Doc });
+            _isClose = true;
         }
 
         private async void Button_Click(object sender, RoutedEventArgs e)
@@ -41,7 +44,7 @@ namespace RevitDoom.Views
                 _frameCount = 0;
             _lastFpsTime = DateTime.Now;
 
-            for (int i = 0; i < 9999; i++)
+           while(!_isClose)
             {
                 _doomApp.NextStep();
 

@@ -1,12 +1,11 @@
-﻿using Autodesk.Revit.DB.DirectContext3D;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using System.Collections.Generic;
-using System;
 using RevitDoom.RevitDrow;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using View = Autodesk.Revit.DB.View;
 
 public class FlatFaceServer : IDirectContext3DServer, IExternalServer
@@ -127,6 +126,7 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
 
     public void RenderScene(View view, DisplayStyle style)
     {
+
         try
         {
             foreach (var data in faces)
