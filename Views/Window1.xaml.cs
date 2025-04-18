@@ -16,6 +16,10 @@ namespace RevitDoom.Views
         private DoomApp _doomApp;
         private RevitTask _task;
 
+        private int _frameCount = 0;
+        private DateTime _lastFpsTime = DateTime.Now;
+
+
         public Window1(DoomApp doomApp)
         {
             _doomApp = doomApp;
@@ -37,6 +41,9 @@ namespace RevitDoom.Views
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
+            _frameCount = 0;
+            _lastFpsTime = DateTime.Now;
+
             for (int i = 0; i < 10; i++)
             {
                 _doomApp.NextStep();
@@ -55,6 +62,20 @@ namespace RevitDoom.Views
                     }
                 }
                     );
+
+                _frameCount++;
+
+                // Обновление FPS каждую секунду
+                var now = DateTime.Now;
+                if ((now - _lastFpsTime).TotalSeconds >= 1.0)
+                {
+                    double fps = _frameCount / (now - _lastFpsTime).TotalSeconds;
+                    FpsTextBlock.Text = $"FPS: {fps:F1}";
+                    _frameCount = 0;
+                    _lastFpsTime = now;
+                }
+
+                await Task.Delay(1); // для стабильности WPF UI
             }
         }
 

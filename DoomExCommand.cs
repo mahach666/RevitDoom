@@ -45,8 +45,8 @@ namespace RevitDoom
             if (string.IsNullOrEmpty(wadPath)) return Result.Cancelled;
 
 
-            Server = new FlatFaceServer(uidoc, 160, 100, 0.05);
-            //Server = new FlatPointServer(uidoc, 160, 100, 0.00001);
+            Server = new FlatFaceServer(uidoc, 160, 100, 0.1);
+            //Server = new FlatPointServer(uidoc, 80, 50, 0.02);
 
 
 

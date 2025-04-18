@@ -14,6 +14,15 @@
                 Margin="50,54,0,0"
                 VerticalAlignment="Top"
                 Click="Button_Click" />
+        <TextBlock x:Name="FpsTextBlock"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Margin="10"
+                   FontSize="14"
+                   FontWeight="Bold"
+                   Foreground="Lime"
+                   Text="FPS: -" />
+
 
     </Grid>
 </Window>

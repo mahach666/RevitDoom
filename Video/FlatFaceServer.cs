@@ -98,6 +98,13 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
             targetHeight = height / 4;
             targetWidth = width / 4;
         }
+        else if (faces.Count * 64 == buffer.Length / 4)
+        {
+            scaleX = 8;
+            scaleY = 8;
+            targetHeight = height / 8;
+            targetWidth = width / 8;
+        }
 
         for (int y = 0; y < targetHeight; y++)
         {
@@ -222,25 +229,6 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
         XYZ max = faces[0].Mesh.Vertices.Cast<XYZ>().Aggregate((a, b) => new XYZ(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y), Math.Max(a.Z, b.Z)));
 
         return new Outline(min, max);
-    }
-
-    public static void RemoveEveryNth<T>(IList<T> list, int n)
-    {
-        if (n <= 0)
-            throw new ArgumentException("n must be greater than 0");
-
-        int count = 0;
-
-        // Проходим с конца, чтобы индексы не сдвигались при удалении
-        for (int i = list.Count - 1; i >= 0; i--)
-        {
-            count++;
-
-            if (count % n == 0)
-            {
-                list.RemoveAt(i);
-            }
-        }
     }
 
     public bool UsesHandles() => false;
