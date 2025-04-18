@@ -99,10 +99,10 @@ namespace RevitDoom
                 config.video_highresolution = HighResolution;
                 var content = new GameContent(cmdArgs);
 
-                ConsoleUserInput input = null;
+                WpfUserInput input = null;
                 Doom doom = null;
 
-                input = new ConsoleUserInput(config, e => doom?.PostEvent(e));
+                input = new WpfUserInput(config, e => doom?.PostEvent(e));
                 doom = new Doom(cmdArgs, config, content, null, null, null, input);
 
                 var renderer = new Renderer(config, content);

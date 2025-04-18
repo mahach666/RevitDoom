@@ -7,7 +7,9 @@
         mc:Ignorable="d"
         Title="Window1"
         Height="140"
-        Width="140">
+        Width="140"
+        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}"      
+        >
     <Grid Margin="0,0,0,-6">
         <Button Content="Button"
                 HorizontalAlignment="Left"

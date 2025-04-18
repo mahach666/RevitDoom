@@ -2,10 +2,8 @@
 using RevitDoom.Utils;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace RevitDoom.Views
 {
@@ -26,13 +24,9 @@ namespace RevitDoom.Views
             _doomApp = doomApp;
             this.Closed += MainWindow_Closed;
             _task = new RevitTask();
-
-            //for (int i = 0; i < 100; i++)
-            //{
-            //    _doomApp.NextStep();
-            //}
-
             InitializeComponent();
+            Activate();
+            Focus();
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
@@ -42,11 +36,12 @@ namespace RevitDoom.Views
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-           //this.Dispatcher.Invoke(async() =>  {  
-            _frameCount = 0;
+            this.Dispatcher.Invoke( async() =>
+            {
+                _frameCount = 0;
             _lastFpsTime = DateTime.Now;
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 9999; i++)
             {
                 _doomApp.NextStep();
 
@@ -54,10 +49,7 @@ namespace RevitDoom.Views
                 {
                     using (Transaction t = new Transaction(_doomApp.Doc, "Trigger graphics update"))
                     {
-                        t.Start();
-                        // Временно меняем параметр вида (например, масштаб)
-                        //int oldScale = _doomApp.Doc.ActiveView.Scale;
-                        //_doomApp.Doc.ActiveView.Scale = oldScale == 100 ? 101 : 100;
+                        t.Start();                       
                         app.ActiveUIDocument.RefreshActiveView();
                         t.Commit();
                     }
@@ -66,7 +58,6 @@ namespace RevitDoom.Views
 
                 _frameCount++;
 
-                // Обновление FPS каждую секунду
                 var now = DateTime.Now;
                 if ((now - _lastFpsTime).TotalSeconds >= 1.0)
                 {
@@ -76,9 +67,9 @@ namespace RevitDoom.Views
                     _lastFpsTime = now;
                 }
 
-                   await Task.Delay(1); // для стабильности WPF UI
+                   await Task.Delay(1);
             }
-           //});
+            });
         } 
        
     }
