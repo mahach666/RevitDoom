@@ -2,6 +2,7 @@
 using RevitDoom.Utils;
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,6 +42,7 @@ namespace RevitDoom.Views
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
+           //this.Dispatcher.Invoke(async() =>  {  
             _frameCount = 0;
             _lastFpsTime = DateTime.Now;
 
@@ -53,11 +55,10 @@ namespace RevitDoom.Views
                     using (Transaction t = new Transaction(_doomApp.Doc, "Trigger graphics update"))
                     {
                         t.Start();
-
                         // Временно меняем параметр вида (например, масштаб)
-                        int oldScale = _doomApp.Doc.ActiveView.Scale;
-                        _doomApp.Doc.ActiveView.Scale = oldScale == 100 ? 101 : 100;
-
+                        //int oldScale = _doomApp.Doc.ActiveView.Scale;
+                        //_doomApp.Doc.ActiveView.Scale = oldScale == 100 ? 101 : 100;
+                        app.ActiveUIDocument.RefreshActiveView();
                         t.Commit();
                     }
                 }
@@ -75,10 +76,10 @@ namespace RevitDoom.Views
                     _lastFpsTime = now;
                 }
 
-                await Task.Delay(1); // для стабильности WPF UI
+                   await Task.Delay(1); // для стабильности WPF UI
             }
-        }
-
-
+           //});
+        } 
+       
     }
 }

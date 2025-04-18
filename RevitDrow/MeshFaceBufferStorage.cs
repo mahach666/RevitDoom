@@ -82,6 +82,58 @@ public class MeshFaceBufferStorage : BaseBufferStorage
         IndexBuffer.Unmap();
     }
 
+    public void UpdateVertexColors(ColorWithTransparency color)
+    {
+        if (VertexBuffer == null || VertexBufferCount == 0)
+            return;
+
+        VertexBuffer.Map(VertexPositionNormalColored.GetSizeInFloats() * VertexBufferCount);
+
+        var stream = VertexBuffer.GetVertexStreamPositionNormalColored();
+
+        foreach (var (position, normal) in VerticesWithNormals)
+        {
+            stream.AddVertex(new VertexPositionNormalColored(position, normal, color));
+        }
+
+        VertexBuffer.Unmap();
+
+        // Также обновим цвета в EffectInstance
+        EffectInstance.SetColor(color.GetColor());
+        EffectInstance.SetDiffuseColor(color.GetColor());
+        EffectInstance.SetTransparency((double)color.GetTransparency() / 255.0);
+
+        if (DisplayStyle == DisplayStyle.HLR)
+        {
+            EffectInstance.SetSpecularColor(color.GetColor());
+            EffectInstance.SetAmbientColor(color.GetColor());
+            EffectInstance.SetEmissiveColor(color.GetColor());
+        }
+    }
+
+    //public void UpdateVertexColors(ColorWithTransparency color)
+    //{
+    //    if (VertexBuffer == null || VertexBufferCount == 0)
+    //        return;
+
+    //    // ⬇️ прежний формат! ────────────────────────────
+    //    int floats = VertexPositionNormalColored.GetSizeInFloats();
+    //    VertexBuffer.Map(VertexBufferCount * floats);
+
+    //    var stream = VertexBuffer.GetVertexStreamPositionNormalColored();
+
+    //    // ⬇️ берём позиции и нормали из VerticesWithNormals
+    //    foreach (var (pos, norm) in VerticesWithNormals)
+    //        stream.AddVertex(new VertexPositionNormalColored(pos, norm, color));
+
+    //    VertexBuffer.Unmap();
+
+    //    EffectInstance.SetColor(color.GetColor());
+    //    EffectInstance.SetDiffuseColor(color.GetColor());
+    //    EffectInstance.SetTransparency(color.GetTransparency() / 255.0);
+    //}
+
+
     public override void AddVertexPosition()
     {
         throw new NotImplementedException();
