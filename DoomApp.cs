@@ -29,7 +29,7 @@ namespace RevitDoom
         public IList<XYZ> Pixels;
         public Reference ReferenceObj;
         public Face FaceObj;
-
+        public static WpfUserInput Input;
 
         private Doom _doom;
         private Renderer _renderer;
@@ -50,11 +50,11 @@ namespace RevitDoom
             config.video_highresolution = HighResolution;
             var content = new GameContent(cmdArgs);
 
-            ConsoleUserInput input = null;
+            Input = null;
             _doom = null;
 
-            input = new ConsoleUserInput(config, e => _doom?.PostEvent(e));
-            _doom = new Doom(cmdArgs, config, content, null, null, null, input);
+            Input = new WpfUserInput(config, e => _doom?.PostEvent(e));
+            _doom = new Doom(cmdArgs, config, content, null, null, null, Input);
 
             _renderer = new Renderer(config, content);
 

@@ -1,9 +1,13 @@
 ﻿using Autodesk.Revit.DB;
+using DoomNetFrameworkEngine.DoomEntity.Event;
 using RevitDoom.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using static Autodesk.Revit.DB.SpecTypeId;
+using Window = System.Windows.Window;
 
 namespace RevitDoom.Views
 {
@@ -29,6 +33,8 @@ namespace RevitDoom.Views
             InitializeComponent();
             Activate();
             Focus();
+            KeyDown += MainWindow_KeyDown;
+            KeyUp += MainWindow_KeyUp;
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
@@ -39,41 +45,51 @@ namespace RevitDoom.Views
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.Dispatcher.Invoke( async() =>
+            this.Dispatcher.Invoke(async () =>
             {
                 _frameCount = 0;
-            _lastFpsTime = DateTime.Now;
+                _lastFpsTime = DateTime.Now;
 
-           while(!_isClose)
-            {
-                _doomApp.NextStep();
-
-                await _task.Run(app =>
+                while (!_isClose)
                 {
-                    using (Transaction t = new Transaction(_doomApp.Doc, "Trigger graphics update"))
+                    _doomApp.NextStep();
+
+                    await _task.Run(app =>
                     {
-                        t.Start();                       
-                        app.ActiveUIDocument.RefreshActiveView();
-                        t.Commit();
+                        using (Transaction t = new Transaction(_doomApp.Doc, "Trigger graphics update"))
+                        {
+                            t.Start();
+                            app.ActiveUIDocument.RefreshActiveView();
+                            t.Commit();
+                        }
                     }
+                        );
+
+                    _frameCount++;
+
+                    var now = DateTime.Now;
+                    if ((now - _lastFpsTime).TotalSeconds >= 1.0)
+                    {
+                        double fps = _frameCount / (now - _lastFpsTime).TotalSeconds;
+                        FpsTextBlock.Text = $"FPS: {fps:F1}";
+                        _frameCount = 0;
+                        _lastFpsTime = now;
+                    }
+
+                    await Task.Delay(1);
                 }
-                    );
-
-                _frameCount++;
-
-                var now = DateTime.Now;
-                if ((now - _lastFpsTime).TotalSeconds >= 1.0)
-                {
-                    double fps = _frameCount / (now - _lastFpsTime).TotalSeconds;
-                    FpsTextBlock.Text = $"FPS: {fps:F1}";
-                    _frameCount = 0;
-                    _lastFpsTime = now;
-                }
-
-                   await Task.Delay(1);
-            }
             });
-        } 
-       
+        }
+
+
+        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
+        {
+            DoomApp.Input?.HandleKeyDown(e.Key);
+        }
+
+        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
+        {
+            DoomApp.Input?.HandleKeyUp(e.Key);
+        }
     }
 }

@@ -5,6 +5,7 @@ using DoomNetFrameworkEngine.DoomEntity.World;
 using DoomNetFrameworkEngine.UserInput;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Input;
 
 namespace RevitDoom.UserInput
@@ -19,22 +20,22 @@ namespace RevitDoom.UserInput
         {
             this.config = config;
             postEventCallback = postEvent;
-
-            // Подписываемся на глобальные клавиши (например, в окне MainWindow)
-            var window = System.Windows.Application.Current?.MainWindow;
-            if (window != null)
-            {
-                window.KeyDown += OnKeyDown;
-                window.KeyUp += OnKeyUp;
-            }
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs e)
+
+        public void HandleKeyDown(Key key)
         {
-            if (!pressedKeys.Add(e.Key))
+            if (!pressedKeys.Add(key))
                 return;
 
-            switch (e.Key)
+            //switch (key)
+            //{
+            //    case Key.Escape:
+            //        postEventCallback?.Invoke(new DoomEvent(EventType.KeyDown, DoomKey.Escape));
+            //        break;
+            //        // и так далее
+            //}
+            switch (key)
             {
                 case Key.Escape:
                     postEventCallback?.Invoke(new DoomEvent(EventType.KeyDown, DoomKey.Escape));
@@ -68,13 +69,19 @@ namespace RevitDoom.UserInput
             }
         }
 
-        private void OnKeyUp(object sender, KeyEventArgs e)
+        public void HandleKeyUp(Key key)
         {
-            if (!pressedKeys.Remove(e.Key))
+            if (!pressedKeys.Remove(key))
                 return;
 
-            // Отправка KeyUp
-            switch (e.Key)
+            //switch (key)
+            //{
+            //    case Key.Escape:
+            //        postEventCallback?.Invoke(new DoomEvent(EventType.KeyUp, DoomKey.Escape));
+            //        break;
+            //        // и так далее
+            //}
+            switch (key)
             {
                 case Key.Escape:
                     postEventCallback?.Invoke(new DoomEvent(EventType.KeyUp, DoomKey.Escape));
@@ -108,6 +115,10 @@ namespace RevitDoom.UserInput
             }
         }
 
+        private static extern short GetAsyncKeyState(int vKey);
+
+        private static bool IsKeyDown(ConsoleKey key) => (GetAsyncKeyState((int)key) & 0x8000) != 0;
+
         public void PostEvent(DoomEvent e) { }
 
         public void BuildTicCmd(TicCmd cmd)
@@ -116,20 +127,30 @@ namespace RevitDoom.UserInput
 
             int speed = 1;
 
-            if (pressedKeys.Contains(Key.W)) cmd.ForwardMove += (sbyte)PlayerBehavior.ForwardMove[speed];
-            if (pressedKeys.Contains(Key.S)) cmd.ForwardMove -= (sbyte)PlayerBehavior.ForwardMove[speed];
-            if (pressedKeys.Contains(Key.A)) cmd.SideMove -= (sbyte)PlayerBehavior.SideMove[speed];
-            if (pressedKeys.Contains(Key.D)) cmd.SideMove += (sbyte)PlayerBehavior.SideMove[speed];
+            if (IsKeyDown(ConsoleKey.W))
+                cmd.ForwardMove += (sbyte)PlayerBehavior.ForwardMove[speed];
+            if (IsKeyDown(ConsoleKey.S))
+                cmd.ForwardMove -= (sbyte)PlayerBehavior.ForwardMove[speed];
+            if (IsKeyDown(ConsoleKey.A))
+                cmd.SideMove -= (sbyte)PlayerBehavior.SideMove[speed];
+            if (IsKeyDown(ConsoleKey.D))
+                cmd.SideMove += (sbyte)PlayerBehavior.SideMove[speed];
 
-            if (pressedKeys.Contains(Key.Q)) cmd.AngleTurn += (short)PlayerBehavior.AngleTurn[speed];
-            if (pressedKeys.Contains(Key.E)) cmd.AngleTurn -= (short)PlayerBehavior.AngleTurn[speed];
+            if (IsKeyDown(ConsoleKey.Q))
+                cmd.AngleTurn += (short)PlayerBehavior.AngleTurn[speed];
+            if (IsKeyDown(ConsoleKey.E))
+                cmd.AngleTurn -= (short)PlayerBehavior.AngleTurn[speed];
 
-            if (pressedKeys.Contains(Key.Space)) cmd.Buttons |= TicCmdButtons.Attack;
-            if (pressedKeys.Contains(Key.F)) cmd.Buttons |= TicCmdButtons.Use;
+            if (IsKeyDown(ConsoleKey.Spacebar))
+                cmd.Buttons |= TicCmdButtons.Attack;
+            if (IsKeyDown(ConsoleKey.F))
+                cmd.Buttons |= TicCmdButtons.Use;
+            if (IsKeyDown(ConsoleKey.Escape))
+                postEventCallback?.Invoke(new DoomEvent(EventType.KeyDown, DoomKey.Escape));
 
             for (int i = 1; i <= 7; i++)
             {
-                if (pressedKeys.Contains(Key.D1 + (i - 1)))
+                if (IsKeyDown((ConsoleKey)((int)ConsoleKey.D1 + i - 1)))
                 {
                     cmd.Buttons |= TicCmdButtons.Change;
                     cmd.Buttons |= (byte)((i - 1) << TicCmdButtons.WeaponShift);
@@ -138,14 +159,53 @@ namespace RevitDoom.UserInput
             }
         }
 
-        public void PollMenuKeys() { } // не нужен, так как теперь всё через события
+        private void SendMenuKey(ConsoleKey key, DoomKey mapped)
+        {
+            if (IsKeyDown(key))
+            {
+                if (!pressedKeys.Contains((Key)key))
+                {
+                    pressedKeys.Add((Key)key);
+                    postEventCallback?.Invoke(new DoomEvent(EventType.KeyDown, mapped));
+                }
+            }
+            else if (pressedKeys.Remove((Key)key))
+            {
+                postEventCallback?.Invoke(new DoomEvent(EventType.KeyUp, mapped));
+            }
+        }
 
-        public void Reset() => pressedKeys.Clear();
+        public void Reset() { pressedKeys.Clear(); }
         public void GrabMouse() { }
         public void ReleaseMouse() { }
-        public void Dispose() => Reset();
+        public void Dispose() { }
 
         public int MaxMouseSensitivity => 15;
         public int MouseSensitivity { get => 5; set { } }
+
+
+
+        public void PollMenuKeys()
+        {
+            SendMenuKey(ConsoleKey.UpArrow, DoomKey.Up);
+            SendMenuKey(ConsoleKey.W, DoomKey.Up);
+
+            SendMenuKey(ConsoleKey.DownArrow, DoomKey.Down);
+            SendMenuKey(ConsoleKey.S, DoomKey.Down);
+
+            SendMenuKey(ConsoleKey.LeftArrow, DoomKey.Left);
+            SendMenuKey(ConsoleKey.A, DoomKey.Left);
+
+            SendMenuKey(ConsoleKey.RightArrow, DoomKey.Right);
+            SendMenuKey(ConsoleKey.D, DoomKey.Right);
+
+            SendMenuKey(ConsoleKey.Enter, DoomKey.Enter);
+            SendMenuKey(ConsoleKey.Spacebar, DoomKey.Enter);
+
+            SendMenuKey(ConsoleKey.Escape, DoomKey.Escape);
+
+            SendMenuKey(ConsoleKey.Y, DoomKey.Y);
+            SendMenuKey(ConsoleKey.N, DoomKey.N);
+        }
     }
 }
