@@ -1,8 +1,6 @@
-﻿
-using Autodesk.Revit.UI;
+﻿using Autodesk.Revit.UI;
 using System;
 using System.Reflection;
-using System.Windows.Forms;
 
 namespace RevitDoom
 {
@@ -37,7 +35,7 @@ namespace RevitDoom
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message);
+                //MessageBox.Show(e.Message);
             }
 
             return Result.Succeeded;

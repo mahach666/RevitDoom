@@ -100,27 +100,6 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
         }
     }
 
-    //private MeshData CreateQuad(XYZ origin, double size)
-    //{
-    //    size = size * 2;
-    //    var mesh = new MeshData();
-
-    //    XYZ p0 = origin;
-    //    XYZ p1 = origin + new XYZ(size, 0, 0);
-    //    XYZ p2 = origin + new XYZ(size, size, 0);
-    //    XYZ p3 = origin + new XYZ(0, size, 0);
-
-    //    mesh.Vertices.Add(p0); // 0
-    //    mesh.Vertices.Add(p1); // 1
-    //    mesh.Vertices.Add(p2); // 2
-    //    mesh.Vertices.Add(p3); // 3
-
-    //    //mesh.Triangles.Add(new IndexTriangle(0, 1, 2));
-    //    mesh.Triangles.Add(new IndexTriangle(0, 2, 3));
-
-    //    return mesh;
-    //}
-
     private MeshData CreateQuad(XYZ origin, double size)
     {
         size = size * 2;
@@ -142,11 +121,6 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
 
         return mesh;
     }
-
-
-
-
-
 
     public void RenderScene(View view, DisplayStyle style)
     {

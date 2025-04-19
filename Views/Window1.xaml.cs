@@ -1,12 +1,11 @@
 ﻿using Autodesk.Revit.DB;
-using DoomNetFrameworkEngine.DoomEntity.Event;
+using RevitDoom.UserInput;
 using RevitDoom.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using static Autodesk.Revit.DB.SpecTypeId;
 using Window = System.Windows.Window;
 
 namespace RevitDoom.Views
@@ -24,6 +23,8 @@ namespace RevitDoom.Views
 
         private bool _isClose = false;
 
+        private WpfUserInput _input;
+
 
         public Window1(DoomApp doomApp)
         {
@@ -33,8 +34,11 @@ namespace RevitDoom.Views
             InitializeComponent();
             Activate();
             Focus();
-            KeyDown += MainWindow_KeyDown;
-            KeyUp += MainWindow_KeyUp;
+
+            _input = doomApp.Input;
+            _input.AttachWindow(this);
+
+            Keyboard.Focus(this);
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
@@ -45,8 +49,8 @@ namespace RevitDoom.Views
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            this.Dispatcher.Invoke(async () =>
-            {
+            //this.Dispatcher.Invoke(async () =>
+            //{
                 _frameCount = 0;
                 _lastFpsTime = DateTime.Now;
 
@@ -78,18 +82,7 @@ namespace RevitDoom.Views
 
                     await Task.Delay(1);
                 }
-            });
-        }
-
-
-        private void MainWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-            DoomApp.Input?.HandleKeyDown(e.Key);
-        }
-
-        private void MainWindow_KeyUp(object sender, KeyEventArgs e)
-        {
-            DoomApp.Input?.HandleKeyUp(e.Key);
+            //});
         }
     }
 }
