@@ -63,23 +63,23 @@ namespace RevitDoom.Dooms
             return this;
         }
 
-        public DoomApp Build()
-        {
-            var app = new DoomApp()
-            {
-                IwadPath = _iwadPath,
-                HighResolution = _highResolution,
-                ExtraArgs = _extraArgs,
-                Scale = _scale,
-                Uidoc = _uidoc,
-                Pixels = _pixels,
-                ReferenceObj = _referenceObj,
-                FaceObj = _faceObj
-            };
+        //public DoomApp Build()
+        //{
+        //    var app = new DoomApp()
+        //    {
+        //        IwadPath = _iwadPath,
+        //        HighResolution = _highResolution,
+        //        ExtraArgs = _extraArgs,
+        //        Scale = _scale,
+        //        Uidoc = _uidoc,
+        //        Pixels = _pixels,
+        //        ReferenceObj = _referenceObj,
+        //        FaceObj = _faceObj
+        //    };
 
-            app.Initialize();
-            return app;
-        }
+        //    app.Initialize();
+        //    return app;
+        //}
     }
 }
 

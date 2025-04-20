@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using DoomNetFrameworkEngine;
@@ -17,7 +18,7 @@ namespace RevitDoom.UserInput
     public class WpfUserInput : IUserInput, IDisposable
     {
         private readonly Config _config;
-        private readonly Action<DoomEvent>? _postEvent;
+        private Action<DoomEvent>? _postEvent;
 
         private Window? _window;
 
@@ -33,9 +34,14 @@ namespace RevitDoom.UserInput
         private readonly HashSet<Key> _menuPressedKeys = new();  
 
 
-        public WpfUserInput(Config config, Action<DoomEvent>? postEvent = null)
+        public WpfUserInput(Config config)
         {
             _config = config;
+            //_postEvent = postEvent;
+        }
+
+        public void RegisteredApp(Action<DoomEvent> postEvent)
+        {
             _postEvent = postEvent;
         }
 

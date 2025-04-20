@@ -1,21 +1,30 @@
-﻿<Window x:Class="RevitDoom.Views.Window1"
+﻿<Window x:Class="RevitDoom.Views.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:RevitDoom.Views"
         mc:Ignorable="d"
         Title="Window1"
         Height="140"
         Width="140"
-        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}"      
+        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}"          
         >
+    
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding WindowClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+
     <Grid Margin="0,0,0,-6">
-        <Button Content="Button"
+        <Button Content="Run"
                 HorizontalAlignment="Left"
                 Margin="50,54,0,0"
                 VerticalAlignment="Top"
-                Click="Button_Click" />
+                Command="{Binding RunGameCommand}" />
         <TextBlock x:Name="FpsTextBlock"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Top"
@@ -23,8 +32,6 @@
                    FontSize="14"
                    FontWeight="Bold"
                    Foreground="Lime"
-                   Text="FPS: -" />
-
-
+                   Text="{Binding FpsText}" />
     </Grid>
 </Window>

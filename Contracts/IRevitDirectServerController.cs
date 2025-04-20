@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace RevitDoom.Contracts
 {
-    internal interface IRevitDirectServerController
+    public interface IRevitDirectServerController
     {
         public void RegisterServer(CastomDirectContextServer revitServer);
         public void RegisterMultiServer(List<CastomDirectContextServer> serverList);

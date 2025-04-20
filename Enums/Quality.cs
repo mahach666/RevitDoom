@@ -10,6 +10,7 @@ namespace RevitDoom.Enums
     {
         Low,
         Medium,
-        High
+        High,
+        Invalid
     }
 }

@@ -3,6 +3,7 @@ using DoomNetFrameworkEngine.DoomEntity;
 using DoomNetFrameworkEngine.DoomEntity.Game;
 using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.Video;
+using RevitDoom.Contracts;
 using RevitDoom.Models;
 using RevitDoom.UserInput;
 using System.Linq;
@@ -11,10 +12,10 @@ namespace RevitDoom.Dooms
 {
     public class DoomApp
     {
-        private WpfUserInput _input;
-
         private DoomAppOptions _options;
-        private DirectContextService _directContextService;
+        private IDirectContextController _directContextService;
+        private WpfUserInput _input;
+        private Config _config;
 
         private Doom _doom;
         private Renderer _renderer;
@@ -23,10 +24,14 @@ namespace RevitDoom.Dooms
         private int _height;
 
         public DoomApp(DoomAppOptions doomAppOptions,
-            DirectContextService directContextService)
+            IDirectContextController directContextService,
+            WpfUserInput userInput,
+            Config config)
         {
             _options = doomAppOptions;
             _directContextService = directContextService;
+            _input = userInput;
+            _config = config;
             Initialize();
         }
 
@@ -39,20 +44,19 @@ namespace RevitDoom.Dooms
             }
 
             var cmdArgs = new CommandLineArgs(argsList);
-            var config = new Config();
-            config.video_highresolution = _options.HighResolution;
+            _config.video_highresolution = _options.HighResolution;
             var content = new GameContent(cmdArgs);
           
-            _doom = new Doom(cmdArgs, config, content, null, null, null, _input);
+            _doom = new Doom(cmdArgs, _config, content, null, null, null, _input);
 
-            _renderer = new Renderer(config, content);
+            _renderer = new Renderer(_config, content);
 
             _width = _renderer.Width;
             _height = _renderer.Height;
             _buffer = new byte[4 * _width * _height];
         }
 
-        public void NextStep()
+        public void NextFrame()
         {
             try
             {
