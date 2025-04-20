@@ -8,7 +8,7 @@ namespace RevitDoom.Models
 {
     public class DirectContextService : IDirectContextController, IDisposable
     {
-        public IDirectContext3DServer ActiveServer { get; private set; }
+        private CastomDirectContextServer _activeServer { get;  set; }
 
         private readonly UIApplication _uIApplication;
         private readonly UIDocument _uIDocument;
@@ -26,17 +26,22 @@ namespace RevitDoom.Models
         }
 
         public void RegisterServer<T>(Quality quality) 
-            where T : IDirectContext3DServer
+            where T : CastomDirectContextServer
         {
             UnregisterAllServers();
 
-            ActiveServer = _serverFactory.Create<T>(quality);
+            _activeServer = _serverFactory.Create<T>(quality);
 
-            _revitService.RegisterServer(ActiveServer);
+            _revitService.RegisterServer(_activeServer);
         }
 
         public void UnregisterAllServers() => _revitService.UnregisterAllServers();
 
+        public void Update(byte[] buffer, int width, int height)
+        {
+            _activeServer.SetPixels(buffer, width, height);
+        }
         public void Dispose() => UnregisterAllServers();
+
     }
 }

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using View = Autodesk.Revit.DB.View;
 
-public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer, IExternalServer
+public class FlatFaceServer : CastomDirectContextServer
 {
     private Guid m_guid = Guid.NewGuid();
 
@@ -39,7 +39,7 @@ public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer
         }
     }
 
-    public void SetPixel(int x, int y, int width, ColorWithTransparency color)
+    public override void SetPixel(int x, int y, int width, ColorWithTransparency color)
     {
         int index = y * width + x;
         if (index >= 0 && index < faces.Count)
@@ -49,7 +49,7 @@ public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer
     }
 
 
-    public void SetPixels(byte[] buffer, int width, int height)
+    public override void SetPixels(byte[] buffer, int width, int height)
     {
         int scaleX = 1;
         int scaleY = 1;
@@ -101,7 +101,7 @@ public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer
         }
     }
 
-    private MeshData CreateMetaData(XYZ origin, double size)
+    private  MeshData CreateMetaData(XYZ origin, double size)
     {
         size = size * 2;
         var mesh = new MeshData();
@@ -121,7 +121,7 @@ public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer
         return mesh;
     }
 
-    public void RenderScene(View view, DisplayStyle style)
+    public override void RenderScene(View view, DisplayStyle style)
     {
 
         try
@@ -156,7 +156,7 @@ public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer
         }
     }
 
-    public Outline GetBoundingBox(View dBView)
+    public override Outline GetBoundingBox(View dBView)
     {
         if (faces.Count == 0) return new Outline(XYZ.Zero, XYZ.Zero);
 
@@ -166,14 +166,14 @@ public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer
         return new Outline(min, max);
     }
 
-    public bool UsesHandles() => false;
-    public bool UseInTransparentPass(View view) => false;
-    public bool CanExecute(View view) => true;
-    public Guid GetServerId() => m_guid;
-    public string GetVendorId() => "GenFusions";
-    public ExternalServiceId GetServiceId() => ExternalServices.BuiltInExternalServices.DirectContext3DService;
-    public string GetName() => "Flat Screen Server";
-    public string GetDescription() => "Draws flat quads instead of cubes";
-    public string GetApplicationId() => "";
-    public string GetSourceId() => "";
+    public override bool UsesHandles() => false;
+    public override bool UseInTransparentPass(View view) => false;
+    public override bool CanExecute(View view) => true;
+    public override Guid GetServerId() => m_guid;
+    public override string GetVendorId() => "GenFusions";
+    public override ExternalServiceId GetServiceId() => ExternalServices.BuiltInExternalServices.DirectContext3DService;
+    public override string GetName() => "Flat Screen Server";
+    public override string GetDescription() => "Draws flat quads instead of cubes";
+    public override string GetApplicationId() => "";
+    public override string GetSourceId() => "";
 }

@@ -14,6 +14,7 @@ namespace RevitDoom.Dooms
         private WpfUserInput _input;
 
         private DoomAppOptions _options;
+        private DirectContextService _directContextService;
 
         private Doom _doom;
         private Renderer _renderer;
@@ -21,9 +22,12 @@ namespace RevitDoom.Dooms
         private int _width;
         private int _height;
 
-        public DoomApp(DoomAppOptions doomAppOptions)
+        public DoomApp(DoomAppOptions doomAppOptions,
+            DirectContextService directContextService)
         {
             _options = doomAppOptions;
+            _directContextService = directContextService;
+            Initialize();
         }
 
         public void Initialize()
@@ -52,7 +56,6 @@ namespace RevitDoom.Dooms
         {
             try
             {
-
                 if (_doom.Menu.Active || _doom.State != DoomState.Game)
                 {
                     _input.PollMenuKeys();
@@ -61,7 +64,7 @@ namespace RevitDoom.Dooms
                 _doom.Update();
                 _renderer.Render(_doom, _buffer, Fixed.Zero);
 
-                DoomExCommand.Server.SetPixels(_buffer, _width, _height);
+                _directContextService.Update(_buffer, _width, _height);
             }
             catch
             {

@@ -5,7 +5,7 @@ namespace RevitDoom.Contracts
 {
     public interface IServerFactory
     {
-        IDirectContext3DServer Create<TServer>(Quality quality)
-            where TServer : IDirectContext3DServer;
+        CastomDirectContextServer Create<TServer>(Quality quality)
+            where TServer : CastomDirectContextServer;
     }
 }

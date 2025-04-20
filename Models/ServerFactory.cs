@@ -19,14 +19,14 @@ namespace RevitDoom.Models
         }
 
         private static readonly Dictionary<Type,
-            Func<UIDocument, int, int, double, IDirectContext3DServer>> _registry
+            Func<UIDocument, int, int, double, CastomDirectContextServer>> _registry
             = new()
             {
                 [typeof(FlatFaceServer)] = (d, w, h, c) => new FlatFaceServer(d, w, h, c),
             };
 
-        public IDirectContext3DServer Create<TServer>(Quality quality)
-            where TServer : IDirectContext3DServer
+        public CastomDirectContextServer Create<TServer>(Quality quality)
+            where TServer : CastomDirectContextServer
         {
             _qualityConverter.Convert(quality,
                 out var height,

@@ -17,7 +17,7 @@ namespace RevitDoom.Models
             _uIApplication = uIApplication;
         }
 
-        public void RegisterServer(IDirectContext3DServer revitServer)
+        public void RegisterServer(CastomDirectContextServer revitServer)
         {
             ExternalService service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService);
             MultiServerService multiServerService = service as MultiServerService;
@@ -27,7 +27,7 @@ namespace RevitDoom.Models
             multiServerService.SetActiveServers(activeServerIds);
         }
 
-        public void RegisterMultiServer(List<IDirectContext3DServer> serverList)
+        public void RegisterMultiServer(List<CastomDirectContextServer> serverList)
         {
             ExternalService service = ExternalServiceRegistry.GetService(ExternalServices.BuiltInExternalServices.DirectContext3DService);
             MultiServerService multiServerService = service as MultiServerService;
