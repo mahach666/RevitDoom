@@ -3,9 +3,9 @@ using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 
-namespace RevitDoom
+namespace RevitDoom.Dooms
 {
-    public class AppBuilder
+    public class DoomAppBuilder
     {
         private string _iwadPath = "DOOM1.WAD";
         private bool _highResolution = false;
@@ -16,48 +16,48 @@ namespace RevitDoom
         private Reference _referenceObj;
         private Face _faceObj;
 
-        public AppBuilder SetIwad(string path)
+        public DoomAppBuilder SetIwad(string path)
         {
             _iwadPath = path;
             return this;
         }
 
-        public AppBuilder EnableHighResolution(bool enable = true)
+        public DoomAppBuilder EnableHighResolution(bool enable = true)
         {
             _highResolution = enable;
             return this;
         }
 
-        public AppBuilder WithArgs(params string[] args)
+        public DoomAppBuilder WithArgs(params string[] args)
         {
             _extraArgs = args;
             return this;
         }
-        public AppBuilder WithScale(uint scale)
+        public DoomAppBuilder WithScale(uint scale)
         {
             _scale = scale;
             return this;
         }
 
-        public AppBuilder WithPixels(IList<XYZ> pixels)
+        public DoomAppBuilder WithPixels(IList<XYZ> pixels)
         {
             _pixels = pixels;
             return this;
         }
 
-        public AppBuilder WithUIDocument(UIDocument uIDocument)
+        public DoomAppBuilder WithUIDocument(UIDocument uIDocument)
         {
             _uidoc = uIDocument;
             return this;
         }
 
-        public AppBuilder WithReferenceObj(Reference referenceObj)
+        public DoomAppBuilder WithReferenceObj(Reference referenceObj)
         {
             _referenceObj = referenceObj;
             return this;
         }
 
-        public AppBuilder WithFaceObj(Face faceObj)
+        public DoomAppBuilder WithFaceObj(Face faceObj)
         {
             _faceObj = faceObj;
             return this;

@@ -1,4 +1,5 @@
 ﻿using Autodesk.Revit.DB;
+using RevitDoom.Dooms;
 using RevitDoom.Models;
 using RevitDoom.UserInput;
 using System;
@@ -35,7 +36,7 @@ namespace RevitDoom.Views
             Activate();
             Focus();
 
-            _input = doomApp.Input;
+            _input = doomApp._input;
             _input.AttachWindow(this);
 
             Keyboard.Focus(this);

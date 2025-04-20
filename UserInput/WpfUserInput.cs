@@ -27,11 +27,10 @@ namespace RevitDoom.UserInput
         private readonly bool[] _weaponKeys = new bool[7];
         private int _turnHeld;
 
-        // Mouse state
         private bool _mouseGrabbed;
         private Vector2 _mouseDelta;
 
-        private readonly HashSet<Key> _menuPressedKeys = new();   // только для меню
+        private readonly HashSet<Key> _menuPressedKeys = new();  
 
 
         public WpfUserInput(Config config, Action<DoomEvent>? postEvent = null)
@@ -39,8 +38,6 @@ namespace RevitDoom.UserInput
             _config = config;
             _postEvent = postEvent;
         }
-
-        // ───────────────────────────── public API ───────────────────────────────
 
         public void AttachWindow(Window window)
         {
@@ -56,18 +53,13 @@ namespace RevitDoom.UserInput
             window.LostKeyboardFocus += (_, _) => _pressedKeys.Clear();
         }
 
-        // ────────────────────────────── IUserInput ──────────────────────────────
-
         public void BuildTicCmd(TicCmd cmd)
         {
-            // Считывание состояний
             var kForward = IsPressed(_config.key_forward);
             var kBackward = IsPressed(_config.key_backward);
             var kStrafeLeft = IsPressed(_config.key_strafeleft);
             var kStrafeRight = IsPressed(_config.key_straferight);
 
-            //var kTurnLeft = IsPressed(_config.key_turnleft);
-            //var kTurnRight = IsPressed(_config.key_turnright);
             var kTurnLeft = IsPressed(_config.key_turnleft) || _pressedKeys.Contains(Key.Q);
             var kTurnRight = IsPressed(_config.key_turnright) || _pressedKeys.Contains(Key.E);
             var kFire = IsPressed(_config.key_fire) || _pressedKeys.Contains(Key.Space);
@@ -93,7 +85,6 @@ namespace RevitDoom.UserInput
             var side = 0;
             var strafe = kStrafe;
 
-            // ─── повороты ─────────────────────────────────────────────
             if (kTurnLeft || kTurnRight) _turnHeld++; else _turnHeld = 0;
             var turnSpeed = _turnHeld < PlayerBehavior.SlowTurnTics ? 2 : speed;
 
@@ -108,17 +99,14 @@ namespace RevitDoom.UserInput
                 if (kTurnLeft) cmd.AngleTurn += (short)PlayerBehavior.AngleTurn[turnSpeed];
             }
 
-            // ─── движение ────────────────────────────────────────────
             if (kForward) forward += PlayerBehavior.ForwardMove[speed];
             if (kBackward) forward -= PlayerBehavior.ForwardMove[speed];
             if (kStrafeLeft) side -= PlayerBehavior.SideMove[speed];
             if (kStrafeRight) side += PlayerBehavior.SideMove[speed];
 
-            // ─── действия ─────────────────────────────────────────────
             if (kFire) cmd.Buttons |= TicCmdButtons.Attack;
             if (kUse) cmd.Buttons |= TicCmdButtons.Use;
 
-            // ─── оружие ───────────────────────────────────────────────
             for (int i = 0; i < _weaponKeys.Length; i++)
                 if (_weaponKeys[i])
                 {
@@ -127,10 +115,8 @@ namespace RevitDoom.UserInput
                     break;
                 }
 
-            // ─── мышь ─────────────────────────────────────────────────
-            if (_mouseGrabbed) ApplyMouse(ref cmd, ref forward, ref side, strafe);
+            //if (_mouseGrabbed) ApplyMouse(ref cmd, ref forward, ref side, strafe);
 
-            // ─── clamp & commit ──────────────────────────────────────
             forward = NetFunc.Clamp(forward, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
             side = NetFunc.Clamp(side, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
 
@@ -140,7 +126,6 @@ namespace RevitDoom.UserInput
 
         public void PollMenuKeys()
         {
-            // курсор меню
             SendMenuKey(Key.Up, DoomKey.Up);
             SendMenuKey(Key.W, DoomKey.Up);
 
@@ -153,12 +138,10 @@ namespace RevitDoom.UserInput
             SendMenuKey(Key.Right, DoomKey.Right);
             SendMenuKey(Key.D, DoomKey.Right);
 
-            // подтверждение / выход
             SendMenuKey(Key.Enter, DoomKey.Enter);
             SendMenuKey(Key.Space, DoomKey.Enter);
             SendMenuKey(Key.Escape, DoomKey.Escape);
 
-            // да / нет
             SendMenuKey(Key.Y, DoomKey.Y);
             SendMenuKey(Key.N, DoomKey.N);
         }
@@ -166,13 +149,13 @@ namespace RevitDoom.UserInput
 
         private void SendMenuKey(Key wpfKey, DoomKey mapped)
         {
-            bool down = Keyboard.IsKeyDown(wpfKey);   // статическое API WPF
+            bool down = Keyboard.IsKeyDown(wpfKey);  
             if (down)
             {
-                if (_menuPressedKeys.Add(wpfKey))     // KeyDown ещё не уходил
+                if (_menuPressedKeys.Add(wpfKey))     
                     _postEvent?.Invoke(new DoomEvent(EventType.KeyDown, mapped));
             }
-            else if (_menuPressedKeys.Remove(wpfKey)) // был Down, теперь Up
+            else if (_menuPressedKeys.Remove(wpfKey))
             {
                 _postEvent?.Invoke(new DoomEvent(EventType.KeyUp, mapped));
             }
@@ -183,7 +166,7 @@ namespace RevitDoom.UserInput
         {
             _pressedKeys.Clear();
             _pressedMouse.Clear();
-            _menuPressedKeys.Clear();   // ← важно
+            _menuPressedKeys.Clear();
             _mouseDelta = Vector2.Zero;
         }
 
@@ -207,8 +190,6 @@ namespace RevitDoom.UserInput
             _window.MouseDown -= OnMouseDown;
             _window.MouseUp -= OnMouseUp;
         }
-
-        // ─────────────────────────── helpers ─────────────────────────────────────
 
         private void ApplyMouse(ref TicCmd cmd,
                                 ref int forward,
@@ -242,13 +223,11 @@ namespace RevitDoom.UserInput
 
         private bool IsMousePressed(int mb) => mb switch
         {
-            0 => _pressedMouse.Contains(MouseButton.Left),
-            1 => _pressedMouse.Contains(MouseButton.Right),
-            2 => _pressedMouse.Contains(MouseButton.Middle),
-            _ => false
+            //0 => _pressedMouse.Contains(MouseButton.Left),
+            //1 => _pressedMouse.Contains(MouseButton.Right),
+            //2 => _pressedMouse.Contains(MouseButton.Middle),
+            //_ => false
         };
-
-        // ──────────────── событие клавиатуры/мыши ───────────────────────────────
 
         private void OnKeyDown(object? s, KeyEventArgs e)
         {
@@ -264,16 +243,16 @@ namespace RevitDoom.UserInput
 
         private void OnMouseMove(object? s, MouseEventArgs e)
         {
-            if (!_mouseGrabbed) return;
-            var p = e.GetPosition(_window);
-            _mouseDelta += new Vector2((float)p.X, (float)p.Y);
+            //if (!_mouseGrabbed) return;
+            //var p = e.GetPosition(_window);
+            //_mouseDelta += new Vector2((float)p.X, (float)p.Y);
         }
 
-        private void OnMouseDown(object? s, MouseButtonEventArgs e)
-            => _pressedMouse.Add(e.ChangedButton);
+        private void OnMouseDown(object? s, MouseButtonEventArgs e) { }
+        //=> _pressedMouse.Add(e.ChangedButton);
 
-        private void OnMouseUp(object? s, MouseButtonEventArgs e)
-            => _pressedMouse.Remove(e.ChangedButton);
+        private void OnMouseUp(object? s, MouseButtonEventArgs e) { }
+            //=> _pressedMouse.Remove(e.ChangedButton);
 
         private void SendMenuEvent(Key key, bool down)
         {
@@ -295,7 +274,6 @@ namespace RevitDoom.UserInput
                 _postEvent?.Invoke(new DoomEvent(down ? EventType.KeyDown : EventType.KeyUp, mapped.Value));
         }
 
-        // ──────────────── перевод DoomKey → WPF.Key ──────────────────────────────
         private static Key DoomToWpf(DoomKey k) => k switch
         {
             DoomKey.A => Key.A,

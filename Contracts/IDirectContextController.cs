@@ -6,8 +6,10 @@ namespace RevitDoom.Contracts
 {
     internal interface IDirectContextController
     {
-        void RegisterServer(Quality quality);
+        void RegisterServer<T>(Quality quality) 
+            where T : IDirectContext3DServer;
         void UnregisterAllServers();
         IDirectContext3DServer ActiveServer { get; }
+        void Update();
     }
 }

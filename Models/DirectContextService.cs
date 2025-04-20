@@ -6,16 +6,16 @@ using System;
 
 namespace RevitDoom.Models
 {
-    internal class DirectContextService :  IDirectContextController, IDisposable
+    public class DirectContextService : IDirectContextController, IDisposable
     {
         public IDirectContext3DServer ActiveServer { get; private set; }
 
         private readonly UIApplication _uIApplication;
         private readonly UIDocument _uIDocument;
         private readonly RevitService _revitService;
-        private readonly ServerFactory _serverFactory;
+        private readonly IServerFactory _serverFactory;
 
-        DirectContextService(UIApplication uIApplication,
+        public DirectContextService(UIApplication uIApplication,
             ServerFactory serverFactory,
             RevitService revitService)
         {
@@ -23,28 +23,20 @@ namespace RevitDoom.Models
             _uIDocument = uIApplication.ActiveUIDocument;
             _revitService = revitService;
             _serverFactory = serverFactory;
-
-            RegisterServer<FlatFaceServer>(Quality.Medium);
         }
 
-        public void RegisterServer<T>(Quality quality) where T : IDirectContext3DServer
+        public void RegisterServer<T>(Quality quality) 
+            where T : IDirectContext3DServer
         {
-
-            _revitService.UnregisterAllServers();
+            UnregisterAllServers();
 
             ActiveServer = _serverFactory.Create<T>(quality);
 
             _revitService.RegisterServer(ActiveServer);
         }
 
-        public void UnregisterAllServers()
-        {
-            _revitService.UnregisterAllServers();
-        }
+        public void UnregisterAllServers() => _revitService.UnregisterAllServers();
 
-        public void Dispose()
-        {
-            _revitService.UnregisterAllServers();
-        }
+        public void Dispose() => UnregisterAllServers();
     }
 }

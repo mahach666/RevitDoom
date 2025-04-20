@@ -2,12 +2,13 @@
 using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
 using Autodesk.Revit.UI;
+using RevitDoom.Contracts;
 using System;
 using System.Collections.Generic;
 
 namespace RevitDoom.Models
 {
-    internal class RevitService
+    public class RevitService : IRevitDirectServerController
     {
         private static UIApplication _uIApplication;
 
