@@ -2,13 +2,14 @@
 using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
 using Autodesk.Revit.UI;
+using RevitDoom.Contracts;
 using RevitDoom.RevitDrow;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using View = Autodesk.Revit.DB.View;
 
-public class FlatFaceServer : IDirectContext3DServer, IExternalServer
+public class FlatFaceServer : ICastomDirectContextServer, IDirectContext3DServer, IExternalServer
 {
     private Guid m_guid = Guid.NewGuid();
 
@@ -26,7 +27,7 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
             {
                 XYZ origin = new XYZ(0, x * cellSize, y * cellSize);
 
-                MeshData mesh = CreateQuad(origin, cellSize);
+                MeshData mesh = CreateMetaData(origin, cellSize);
                 var color = new ColorWithTransparency(0, 0, 0, 0);
 
                 faces.Add(new FaceData
@@ -86,7 +87,7 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
                 int srcX = x * scaleX;
                 int srcY = y * scaleY;
 
-                int i = (srcX * srcHeight + srcY) * 4; // Doom: column-major
+                int i = (srcX * srcHeight + srcY) * 4; 
 
                 if (i + 2 >= buffer.Length) continue;
 
@@ -95,12 +96,12 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
                 byte b = buffer[i + 2];
 
                 var color = new ColorWithTransparency(r, g, b, 0);
-                SetPixel(x, targetHeight - y - 1, targetWidth, color); // Y инвертирован
+                SetPixel(x, targetHeight - y - 1, targetWidth, color); 
             }
         }
     }
 
-    private MeshData CreateQuad(XYZ origin, double size)
+    private MeshData CreateMetaData(XYZ origin, double size)
     {
         size = size * 2;
         var mesh = new MeshData();
@@ -110,13 +111,11 @@ public class FlatFaceServer : IDirectContext3DServer, IExternalServer
         XYZ p2 = origin + new XYZ(0, size, size);
         XYZ p3 = origin + new XYZ(0, size, 0);
 
-        mesh.Vertices.Add(p0); // 0
-        mesh.Vertices.Add(p1); // 1
-        mesh.Vertices.Add(p2); // 2
-        mesh.Vertices.Add(p3); // 3
+        mesh.Vertices.Add(p0); 
+        mesh.Vertices.Add(p1); 
+        mesh.Vertices.Add(p2); 
+        mesh.Vertices.Add(p3); 
 
-        // Два треугольника формируют прямоугольник (стену)
-        //mesh.Triangles.Add(new IndexTriangle(0, 1, 2));
         mesh.Triangles.Add(new IndexTriangle(0, 2, 3));
 
         return mesh;

@@ -6,6 +6,7 @@ using System.Windows.Input;
 using DoomNetFrameworkEngine;
 using DoomNetFrameworkEngine.DoomEntity.Event;
 using DoomNetFrameworkEngine.DoomEntity.Game;
+using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.DoomEntity.World;
 using DoomNetFrameworkEngine.UserInput;
 
@@ -130,8 +131,8 @@ namespace RevitDoom.UserInput
             if (_mouseGrabbed) ApplyMouse(ref cmd, ref forward, ref side, strafe);
 
             // ─── clamp & commit ──────────────────────────────────────
-            forward = Math.Clamp(forward, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
-            side = Math.Clamp(side, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
+            forward = NetFunc.Clamp(forward, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
+            side = NetFunc.Clamp(side, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
 
             cmd.ForwardMove += (sbyte)forward;
             cmd.SideMove += (sbyte)side;
@@ -215,8 +216,8 @@ namespace RevitDoom.UserInput
                                 bool strafe)
         {
             var ms = 0.5f * _config.mouse_sensitivity;
-            var mx = (int)MathF.Round(ms * _mouseDelta.X);
-            var my = (int)MathF.Round(ms * -_mouseDelta.Y);
+            var mx = (int)NetFunc.RoundF(ms * _mouseDelta.X);
+            var my = (int)NetFunc.RoundF(ms * -_mouseDelta.Y);
 
             forward += my;
 

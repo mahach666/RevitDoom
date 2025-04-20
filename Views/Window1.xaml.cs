@@ -1,6 +1,6 @@
 ﻿using Autodesk.Revit.DB;
+using RevitDoom.Models;
 using RevitDoom.UserInput;
-using RevitDoom.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -43,7 +43,7 @@ namespace RevitDoom.Views
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
-            RevitServices.UnregisterAllServers(new HashSet<Document>() { _doomApp.Doc });
+            RevitService.UnregisterAllServers(new HashSet<Document>() { _doomApp.Doc });
             _isClose = true;
         }
 

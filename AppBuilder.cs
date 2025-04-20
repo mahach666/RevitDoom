@@ -2,7 +2,6 @@
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace RevitDoom
 {
@@ -12,7 +11,6 @@ namespace RevitDoom
         private bool _highResolution = false;
         private string[] _extraArgs = Array.Empty<string>();
         private uint _scale = 1;
-        private Document _doc = null;
         private UIDocument _uidoc = null;
         private IList<XYZ> _pixels;
         private Reference _referenceObj;
@@ -53,11 +51,6 @@ namespace RevitDoom
             return this;
         }
 
-        public AppBuilder WithDocument(Document uIDocument)
-        {
-            _doc = uIDocument;
-            return this;
-        }
         public AppBuilder WithReferenceObj(Reference referenceObj)
         {
             _referenceObj = referenceObj;
@@ -78,7 +71,6 @@ namespace RevitDoom
                 HighResolution = _highResolution,
                 ExtraArgs = _extraArgs,
                 Scale = _scale,
-                Doc = _doc,
                 Uidoc = _uidoc,
                 Pixels = _pixels,
                 ReferenceObj = _referenceObj,
