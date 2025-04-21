@@ -123,12 +123,24 @@ namespace RevitDoom.ViewModels
         public ICommand WindowClosingCommand => new RelayCommand(OnWindowClosing);
         private void OnWindowClosing()
         {
-            _isRunning = false;
-            _directContextService.UnregisterAllServers();
-            _isClose = true;
-            GlobalKeyboardHook.Uninstall();
-            Thread.Sleep(2000);
-            _directContextService.UnregisterAllServers();
+            try
+            {
+                _isRunning = false;
+                _isClose = true;
+                _directContextService.UnregisterAllServers();
+                GlobalKeyboardHook.Uninstall();
+            }
+            catch
+            {
+                GlobalKeyboardHook.Uninstall();
+                _directContextService.UnregisterAllServers();
+            }
+            finally
+            {
+                Thread.Sleep(2000);
+                _directContextService.UnregisterAllServers();
+                GlobalKeyboardHook.Uninstall();
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
