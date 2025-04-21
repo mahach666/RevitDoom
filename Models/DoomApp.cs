@@ -4,11 +4,10 @@ using DoomNetFrameworkEngine.DoomEntity.Game;
 using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.Video;
 using RevitDoom.Contracts;
-using RevitDoom.Models;
 using RevitDoom.UserInput;
 using System.Linq;
 
-namespace RevitDoom.Dooms
+namespace RevitDoom.Models
 {
     public class DoomApp
     {
@@ -35,7 +34,7 @@ namespace RevitDoom.Dooms
             Initialize();
         }
 
-        public void Initialize()
+        private void Initialize()
         {
             var argsList = new[] { "-iwad", _options.IwadPath };
             if (_options.ExtraArgs.Length > 0)
@@ -46,7 +45,8 @@ namespace RevitDoom.Dooms
             var cmdArgs = new CommandLineArgs(argsList);
             _config.video_highresolution = _options.HighResolution;
             var content = new GameContent(cmdArgs);
-          
+
+            _input.RegisterAppEvent(e => _doom?.PostEvent(e));
             _doom = new Doom(cmdArgs, _config, content, null, null, null, _input);
 
             _renderer = new Renderer(_config, content);

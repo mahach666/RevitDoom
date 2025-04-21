@@ -1,8 +1,8 @@
 ﻿using Autodesk.Revit.DB;
 using RevitDoom.Commands;
 using RevitDoom.Contracts;
-using RevitDoom.Dooms;
 using RevitDoom.Enums;
+using RevitDoom.Models;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -69,7 +69,7 @@ namespace RevitDoom.ViewModels
 
                     await _task.Run(app =>
                     {
-                        using (Transaction t = new Transaction(app.ActiveUIDocument.Document, "Trigger graphics update"))
+                        using (Transaction t = new Transaction(app.ActiveUIDocument.Document, "Graphics update"))
                         {
                             t.Start();
                             app.ActiveUIDocument.RefreshActiveView();

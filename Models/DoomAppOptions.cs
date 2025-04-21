@@ -4,8 +4,8 @@ namespace RevitDoom.Models
 {
     public class DoomAppOptions
     {
-        public string IwadPath { get; init; } = "";
-        public bool HighResolution { get; init; }
-        public string[] ExtraArgs { get; init; } = Array.Empty<string>();
+        public string IwadPath { get; set; } = "";
+        public bool HighResolution { get; set; }
+        public string[] ExtraArgs { get; set; } = Array.Empty<string>();
     }
 }

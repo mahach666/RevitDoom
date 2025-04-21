@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Threading;
-using System.Windows;
-using System.Windows.Input;
-using DoomNetFrameworkEngine;
+﻿using DoomNetFrameworkEngine;
 using DoomNetFrameworkEngine.DoomEntity.Event;
 using DoomNetFrameworkEngine.DoomEntity.Game;
 using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.DoomEntity.World;
 using DoomNetFrameworkEngine.UserInput;
-
+using System;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Windows;
+using System.Windows.Input;
 using InputKeyBinding = DoomNetFrameworkEngine.UserInput.KeyBinding;
 
 namespace RevitDoom.UserInput
@@ -40,7 +38,7 @@ namespace RevitDoom.UserInput
             //_postEvent = postEvent;
         }
 
-        public void RegisteredApp(Action<DoomEvent> postEvent)
+        public void RegisterAppEvent(Action<DoomEvent> postEvent)
         {
             _postEvent = postEvent;
         }

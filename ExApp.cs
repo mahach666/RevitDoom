@@ -6,9 +6,6 @@ namespace RevitDoom
 {
     internal class ExApp : IExternalApplication
     {
-        //public ServerStateMachine ServerStateMachine { get; private set; }
-        //public static ExApp appInstance { get; private set; }
-
         public Result OnShutdown(UIControlledApplication application)
         {
 
@@ -20,9 +17,6 @@ namespace RevitDoom
         {
             try
             {
-                //appInstance = this;
-                //ServerStateMachine = new ServerStateMachine(this);
-
                 string assemblyLocation = Assembly.GetExecutingAssembly().Location;
 
                 string tabName = "DOOM";
@@ -33,9 +27,9 @@ namespace RevitDoom
                 PushButtonData doomBut = new PushButtonData(nameof(DoomExCommand), "DOOM", assemblyLocation, typeof(DoomExCommand).FullName);
                 doomPanel.AddItem(doomBut);
             }
-            catch (Exception e)
+            catch
             {
-                //MessageBox.Show(e.Message);
+
             }
 
             return Result.Succeeded;

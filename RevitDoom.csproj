@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
-		<TargetFramework>net48</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>true</UseWindowsForms>
 		<UseSystemDrawing>true</UseSystemDrawing>
@@ -14,8 +13,9 @@
 	</PropertyGroup>
 
 
+
 	<PropertyGroup>
-		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 	</PropertyGroup>
 	<PropertyGroup Condition="$(Configuration.Contains('R20'))">
 		<RevitVersion>2020</RevitVersion>
@@ -51,23 +51,28 @@
 		<Version>$(RevitVersion).$(AssemblyFileVersion)</Version>
 	</PropertyGroup>
 	
-	<ItemGroup>
-		<None Include="packages.config" />
-	</ItemGroup>
+
 
 	<ItemGroup>
 		<PackageReference Include="Costura.Fody" Version="6.0.0">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		
 		<PackageReference Include="DoomNetFrameworkEngine" Version="1.0.0" />
+		
 		<PackageReference Include="Fody" Version="6.9.2">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.135" />
 		<PackageReference Include="RevitTask" Version="3.0.0" />
-		<PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).*" />
+		
+		<PackageReference Include="Revit_All_Main_Versions_API_x64" Version="$(RevitVersion).*">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		
 		<PackageReference Include="SimpleInjector" Version="5.5.0" />
 		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
 	</ItemGroup>
@@ -76,4 +81,12 @@
 		<Reference Include="System.Windows.Forms" />
 		<Reference Include="WindowsBase" />
 	</ItemGroup>
+
+	<Target Name="CopyAllPackageReferences" AfterTargets="Build">
+		<ItemGroup>
+			<FilteredPackageRefs Include="@(ReferenceCopyLocalPaths)" Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)' != '' &#xD;&#xA;                                 and '%(ReferenceCopyLocalPaths.Private)' != 'true'" />
+		</ItemGroup>
+		<Copy SourceFiles="@(FilteredPackageRefs)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+	</Target>
+
 </Project>
