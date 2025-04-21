@@ -7,6 +7,7 @@ using RevitDoom.UserInput;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -126,6 +127,8 @@ namespace RevitDoom.ViewModels
             _directContextService.UnregisterAllServers();
             _isClose = true;
             GlobalKeyboardHook.Uninstall();
+            Thread.Sleep(2000);
+            _directContextService.UnregisterAllServers();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
