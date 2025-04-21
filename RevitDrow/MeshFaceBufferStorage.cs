@@ -28,7 +28,6 @@ public class MeshFaceBufferStorage : BaseBufferStorage
             var v1 = meshData.Vertices[tri.Index1];
             var v2 = meshData.Vertices[tri.Index2];
 
-            // Нормаль треугольника
             XYZ normal = (v1 - v0).CrossProduct(v2 - v0).Normalize();
 
             VerticesWithNormals.Add(new Tuple<XYZ, XYZ>(v0, normal));
@@ -80,56 +79,7 @@ public class MeshFaceBufferStorage : BaseBufferStorage
         }
 
         IndexBuffer.Unmap();
-    }
-
-
-    //public void UpdateVertexColors(List<ColorWithTransparency> colors)
-    //{
-    //    if (VertexBuffer == null || VertexBufferCount == 0 || colors.Count * 3 != VertexBufferCount)
-    //        return;
-
-    //    VertexBuffer.Map(VertexPositionNormalColored.GetSizeInFloats() * VertexBufferCount);
-    //    var stream = VertexBuffer.GetVertexStreamPositionNormalColored();
-
-    //    SourceVertices = new VertexPositionNormalColored[VertexBufferCount];
-
-    //    for (int i = 0; i < colors.Count; i++)
-    //    {
-    //        var color = colors[i];
-    //        var baseIndex = i * 3;
-
-    //        for (int j = 0; j < 3; j++)
-    //        {
-    //            var (pos, normal) = VerticesWithNormals[baseIndex + j];
-    //            var vertex = new VertexPositionNormalColored(pos, normal, color);
-    //            stream.AddVertex(vertex);
-    //            SourceVertices[baseIndex + j] = vertex;
-    //        }
-    //    }
-
-    //    VertexBuffer.Unmap();
-
-    //    // Цвет в EffectInstance для flat shading
-    //    var lastColor = colors.Count > 0 ? colors[colors.Count - 1] : new ColorWithTransparency(0, 0, 0, 0);
-    //    EffectInstance.SetColor(lastColor.GetColor());
-    //    EffectInstance.SetDiffuseColor(lastColor.GetColor());
-    //    EffectInstance.SetTransparency((double)lastColor.GetTransparency() / 255.0);
-
-    //    if (DisplayStyle == DisplayStyle.HLR)
-    //    {
-    //        EffectInstance.SetSpecularColor(lastColor.GetColor());
-    //        EffectInstance.SetAmbientColor(lastColor.GetColor());
-    //        EffectInstance.SetEmissiveColor(lastColor.GetColor());
-    //    }
-    //}
-    //public void UpdateVertexColors(ColorWithTransparency color)
-    //{
-    //    var flatList = new List<ColorWithTransparency>();
-    //    for (int i = 0; i < PrimitiveCount; i++)
-    //        flatList.Add(color);
-
-    //    UpdateVertexColors(flatList);
-    //}
+    }   
 
     public void UpdateVertexColors(ColorWithTransparency color)
     {
@@ -147,7 +97,6 @@ public class MeshFaceBufferStorage : BaseBufferStorage
 
         VertexBuffer.Unmap();
 
-        // Также обновим цвета в EffectInstance
         EffectInstance.SetColor(color.GetColor());
         EffectInstance.SetDiffuseColor(color.GetColor());
         EffectInstance.SetTransparency((double)color.GetTransparency() / 255.0);
