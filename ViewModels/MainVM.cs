@@ -3,6 +3,7 @@ using RevitDoom.Commands;
 using RevitDoom.Contracts;
 using RevitDoom.Enums;
 using RevitDoom.Models;
+using RevitDoom.UserInput;
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -20,7 +21,6 @@ namespace RevitDoom.ViewModels
         private bool _isClose = false;
         private bool _isRunning = false;
 
-        private Quality _quality = Quality.Medium;
 
         public MainVM(DoomApp doomApp,
             IDirectContextController directContextService)
@@ -44,18 +44,24 @@ namespace RevitDoom.ViewModels
             }
         }
 
+        private Quality _quality = Quality.Medium;
+        public Quality Quality
+        {
+            get => _quality;
+            set
+            {
+                if (_quality != value)
+                {
+                    _quality = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public ICommand RunGameCommand => new RelayCommand(RunGame);
 
         private async void RunGame()
         {
-            if (!_directContextService.IsValid(_quality))
-            {
-                await _task.Run(app =>
-                {
-                    _directContextService.RegisterServer<FlatFaceServer>(_quality);
-                }
-                        );
-            }
 
             _isRunning = true;
             var frameCount = 0;
@@ -65,10 +71,15 @@ namespace RevitDoom.ViewModels
             {
                 while (_isRunning)
                 {
+                    //GlobalKeyboardHook.Install();
                     _doomApp.NextFrame();
 
                     await _task.Run(app =>
                     {
+                        if (!_directContextService.IsValid(_quality))
+                        {
+                            _directContextService.RegisterServer<FlatFaceServer>(_quality);
+                        }
                         using (Transaction t = new Transaction(app.ActiveUIDocument.Document, "Graphics update"))
                         {
                             t.Start();
@@ -97,15 +108,24 @@ namespace RevitDoom.ViewModels
             finally
             {
                 _isRunning = false;
+                //GlobalKeyboardHook.Uninstall();
             }
+        }
+
+        public ICommand StopGameCommand => new RelayCommand(StopGame);
+
+        private void StopGame()
+        {
+            _isRunning = false;
         }
 
         public ICommand WindowClosingCommand => new RelayCommand(OnWindowClosing);
         private void OnWindowClosing()
         {
             _isRunning = false;
-            _isClose = true;
             _directContextService.UnregisterAllServers();
+            _isClose = true;
+            GlobalKeyboardHook.Uninstall();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

@@ -1,4 +1,5 @@
-﻿using RevitDoom.UserInput;
+﻿using RevitDoom.Contracts;
+using RevitDoom.UserInput;
 using RevitDoom.ViewModels;
 using System.Windows.Input;
 using Window = System.Windows.Window;
@@ -7,10 +8,10 @@ namespace RevitDoom.Views
 {
     public partial class MainView : Window
     {
-        private WpfUserInput _input;
+        private CastomUserInput _input;
 
         public MainView(MainVM mainVM,
-            WpfUserInput userInput)
+            CastomUserInput userInput)
         {
             DataContext = mainVM;
 
@@ -18,9 +19,9 @@ namespace RevitDoom.Views
 
             InitializeComponent();
             Activate();
-            Focus();
-            _input.AttachWindow(this);
-            Keyboard.Focus(this);
+            //Focus();
+            //_input.AttachWindow(this);
+            //Keyboard.Focus(this);
         }
     }
 }

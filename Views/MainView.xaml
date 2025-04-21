@@ -5,33 +5,69 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:RevitDoom.Views"
+        xmlns:model="clr-namespace:RevitDoom.Models"
         mc:Ignorable="d"
-        Title="Window1"
-        Height="140"
-        Width="140"
-        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}"          
-        >
-    
+        Title="Revit Doom Control"
+        MinWidth="220"
+        MinHeight="180"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="NoResize"
+        FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Self}}">
+
+    <Window.Resources>
+        <model:EnumToBoolConverter x:Key="EnumToBoolConverter" />
+    </Window.Resources>
+
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
             <i:InvokeCommandAction Command="{Binding WindowClosingCommand}" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
 
+    <Border Padding="10">
+        <DockPanel LastChildFill="True">
 
-    <Grid Margin="0,0,0,-6">
-        <Button Content="Run"
-                HorizontalAlignment="Left"
-                Margin="50,54,0,0"
-                VerticalAlignment="Top"
-                Command="{Binding RunGameCommand}" />
-        <TextBlock x:Name="FpsTextBlock"
-                   HorizontalAlignment="Left"
-                   VerticalAlignment="Top"
-                   Margin="10"
-                   FontSize="14"
-                   FontWeight="Bold"
-                   Foreground="Lime"
-                   Text="{Binding FpsText}" />
-    </Grid>
+            <!-- FPS Counter -->
+            <TextBlock x:Name="FpsTextBlock"
+                       DockPanel.Dock="Top"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       Foreground="Lime"
+                       Text="{Binding FpsText}"
+                       HorizontalAlignment="Left"
+                       Margin="0,0,0,10" />
+
+            <!-- Quality Radio Buttons -->
+            <StackPanel DockPanel.Dock="Top"
+                        Margin="0,0,0,10">
+                <TextBlock Text="Render Quality:"
+                           FontWeight="SemiBold"
+                           Margin="0,0,0,5" />
+                <RadioButton Content="Low (Well... But more FPS)"
+                             IsChecked="{Binding Quality, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Low}"
+                             GroupName="QualityGroup" />
+                <RadioButton Content="Medium (Recommended)"
+                             IsChecked="{Binding Quality, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=Medium}"
+                             GroupName="QualityGroup" />
+                <RadioButton Content="High (You can try it)"
+                             IsChecked="{Binding Quality, Converter={StaticResource EnumToBoolConverter}, ConverterParameter=High}"
+                             GroupName="QualityGroup" />
+            </StackPanel>
+
+            <!-- Bottom Buttons -->
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        DockPanel.Dock="Bottom"
+                        Margin="0,10,0,0">
+                <Button Content="Run"
+                        Width="60"
+                        Margin="0,0,10,0"
+                        Command="{Binding RunGameCommand}" />
+                <Button Content="Stop"
+                        Width="60"
+                        Command="{Binding StopGameCommand}" />
+            </StackPanel>
+
+        </DockPanel>
+    </Border>
 </Window>

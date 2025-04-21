@@ -14,15 +14,10 @@ using InputKeyBinding = DoomNetFrameworkEngine.UserInput.KeyBinding;
 
 namespace RevitDoom.UserInput
 {
-    public class WpfUserInput : CastomUserInput
+    public sealed class LowUserInput : CastomUserInput
     {
         private readonly Config _config;
         private Action<DoomEvent>? _postEvent;
-
-        private Window? _window;
-
-        private readonly HashSet<Key> _pressedKeys = new();
-        private readonly HashSet<MouseButton> _pressedMouse = new();
 
         private readonly bool[] _weaponKeys = new bool[7];
         private int _turnHeld;
@@ -30,70 +25,70 @@ namespace RevitDoom.UserInput
         private bool _mouseGrabbed;
         private Vector2 _mouseDelta;
 
-        private readonly HashSet<Key> _menuPressedKeys = new();  
+        // для отслеживания автоповторов меню
+        private readonly HashSet<Key> _menuPressedKeys = new();
 
-
-        public WpfUserInput(Config config)
+        public LowUserInput(Config config)
         {
+            _ = GlobalKeyboardHook.IsKeyDown(Key.None);
             _config = config;
-            //_postEvent = postEvent;
         }
 
-        public override void RegisterAppEvent(Action<DoomEvent> postEvent)
+        #region IUserInput infrastructure
+        public override void RegisterAppEvent(Action<DoomEvent> postEvent) => _postEvent = postEvent;
+        public void AttachWindow(Window _) { /* больше ничего не привязываем */ }
+
+        public override void Reset()
         {
-            _postEvent = postEvent;
+            _menuPressedKeys.Clear();
+            _mouseDelta = Vector2.Zero;
         }
 
-        public void AttachWindow(Window window)
+        public override void GrabMouse() => _mouseGrabbed = true;
+        public override void ReleaseMouse() => _mouseGrabbed = false;
+
+        public override int MaxMouseSensitivity => 15;
+        public override int MouseSensitivity
         {
-            _window = window;
-
-            window.KeyDown += OnKeyDown;
-            window.KeyUp += OnKeyUp;
-
-            window.MouseMove += OnMouseMove;
-            window.MouseDown += OnMouseDown;
-            window.MouseUp += OnMouseUp;
-
-            window.LostKeyboardFocus += (_, _) => _pressedKeys.Clear();
+            get => _config.mouse_sensitivity;
+            set => _config.mouse_sensitivity = value;
         }
+        #endregion
 
+        #region Main game loop
         public override void BuildTicCmd(TicCmd cmd)
         {
-            var kForward = IsPressed(_config.key_forward);
-            var kBackward = IsPressed(_config.key_backward);
-            var kStrafeLeft = IsPressed(_config.key_strafeleft);
-            var kStrafeRight = IsPressed(_config.key_straferight);
+            bool kForward = IsPressed(_config.key_forward);
+            bool kBackward = IsPressed(_config.key_backward);
+            bool kStrafeLeft = IsPressed(_config.key_strafeleft);
+            bool kStrafeRight = IsPressed(_config.key_straferight);
 
-            var kTurnLeft = IsPressed(_config.key_turnleft) || _pressedKeys.Contains(Key.Q);
-            var kTurnRight = IsPressed(_config.key_turnright) || _pressedKeys.Contains(Key.E);
-            var kFire = IsPressed(_config.key_fire) || _pressedKeys.Contains(Key.Space);
-            var kUse = IsPressed(_config.key_use) || _pressedKeys.Contains(Key.F);
+            bool kTurnLeft = IsPressed(_config.key_turnleft) || IsDown(Key.Q);
+            bool kTurnRight = IsPressed(_config.key_turnright) || IsDown(Key.E);
+            bool kFire = IsPressed(_config.key_fire) || IsDown(Key.Space);
+            bool kUse = IsPressed(_config.key_use) || IsDown(Key.F);
 
-            var kRun = IsPressed(_config.key_run);
-            var kStrafe = IsPressed(_config.key_strafe);
+            bool kRun = IsPressed(_config.key_run);
+            bool kStrafe = IsPressed(_config.key_strafe);
 
-            _weaponKeys[0] = _pressedKeys.Contains(Key.D1);
-            _weaponKeys[1] = _pressedKeys.Contains(Key.D2);
-            _weaponKeys[2] = _pressedKeys.Contains(Key.D3);
-            _weaponKeys[3] = _pressedKeys.Contains(Key.D4);
-            _weaponKeys[4] = _pressedKeys.Contains(Key.D5);
-            _weaponKeys[5] = _pressedKeys.Contains(Key.D6);
-            _weaponKeys[6] = _pressedKeys.Contains(Key.D7);
+            _weaponKeys[0] = IsDown(Key.D1);
+            _weaponKeys[1] = IsDown(Key.D2);
+            _weaponKeys[2] = IsDown(Key.D3);
+            _weaponKeys[3] = IsDown(Key.D4);
+            _weaponKeys[4] = IsDown(Key.D5);
+            _weaponKeys[5] = IsDown(Key.D6);
+            _weaponKeys[6] = IsDown(Key.D7);
 
             cmd.Clear();
 
-            var speed = kRun ? 1 : 0;
+            int speed = kRun ? 1 : 0;
             if (_config.game_alwaysrun) speed = 1 - speed;
 
-            var forward = 0;
-            var side = 0;
-            var strafe = kStrafe;
-
+            int forward = 0, side = 0;
             if (kTurnLeft || kTurnRight) _turnHeld++; else _turnHeld = 0;
-            var turnSpeed = _turnHeld < PlayerBehavior.SlowTurnTics ? 2 : speed;
+            int turnSpeed = _turnHeld < PlayerBehavior.SlowTurnTics ? 2 : speed;
 
-            if (strafe)
+            if (kStrafe)
             {
                 if (kTurnRight) side += PlayerBehavior.SideMove[speed];
                 if (kTurnLeft) side -= PlayerBehavior.SideMove[speed];
@@ -120,7 +115,8 @@ namespace RevitDoom.UserInput
                     break;
                 }
 
-            //if (_mouseGrabbed) ApplyMouse(ref cmd, ref forward, ref side, strafe);
+            // 
+            // if (_mouseGrabbed) ApplyMouse(ref cmd, ref forward, ref side, kStrafe);
 
             forward = NetFunc.Clamp(forward, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
             side = NetFunc.Clamp(side, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
@@ -128,7 +124,9 @@ namespace RevitDoom.UserInput
             cmd.ForwardMove += (sbyte)forward;
             cmd.SideMove += (sbyte)side;
         }
+        #endregion
 
+        #region Меню
         public override void PollMenuKeys()
         {
             SendMenuKey(Key.Up, DoomKey.Up);
@@ -151,13 +149,12 @@ namespace RevitDoom.UserInput
             SendMenuKey(Key.N, DoomKey.N);
         }
 
-
         private void SendMenuKey(Key wpfKey, DoomKey mapped)
         {
-            bool down = Keyboard.IsKeyDown(wpfKey);  
+            bool down = IsDown(wpfKey);
             if (down)
             {
-                if (_menuPressedKeys.Add(wpfKey))     
+                if (_menuPressedKeys.Add(wpfKey))
                     _postEvent?.Invoke(new DoomEvent(EventType.KeyDown, mapped));
             }
             else if (_menuPressedKeys.Remove(wpfKey))
@@ -165,120 +162,40 @@ namespace RevitDoom.UserInput
                 _postEvent?.Invoke(new DoomEvent(EventType.KeyUp, mapped));
             }
         }
+        #endregion
 
-
-        public override void Reset()
+        #region Helpers
+        private bool IsPressed(InputKeyBinding binding)
         {
-            _pressedKeys.Clear();
-            _pressedMouse.Clear();
-            _menuPressedKeys.Clear();
-            _mouseDelta = Vector2.Zero;
+            foreach (var doomKey in binding.Keys)
+                if (IsDown(DoomToWpf(doomKey)))
+                    return true;
+            // аналогично можно проверять binding.MouseButtons через GetAsyncKeyState
+            return false;
         }
 
+        private static bool IsDown(Key key) => GlobalKeyboardHook.IsKeyDown(key);
 
-        public override void GrabMouse() => _mouseGrabbed = true;
-        public override void ReleaseMouse() => _mouseGrabbed = false;
-
-        public override int MaxMouseSensitivity => 15;
-        public override int MouseSensitivity
-        {
-            get => _config.mouse_sensitivity;
-            set => _config.mouse_sensitivity = value;
-        }
-
-        public override void Dispose()
-        {
-            if (_window == null) return;
-            _window.KeyDown -= OnKeyDown;
-            _window.KeyUp -= OnKeyUp;
-            _window.MouseMove -= OnMouseMove;
-            _window.MouseDown -= OnMouseDown;
-            _window.MouseUp -= OnMouseUp;
-        }
-
-        private void ApplyMouse(ref TicCmd cmd,
-                                ref int forward,
-                                ref int side,
-                                bool strafe)
+        /* 
+        private void ApplyMouse(ref TicCmd cmd, ref int forward, ref int side, bool strafe)
         {
             var ms = 0.5f * _config.mouse_sensitivity;
             var mx = (int)NetFunc.RoundF(ms * _mouseDelta.X);
             var my = (int)NetFunc.RoundF(ms * -_mouseDelta.Y);
 
             forward += my;
-
             if (strafe) side += mx * 2;
-            else cmd.AngleTurn -= (short)(mx * 0x8);
+            else        cmd.AngleTurn -= (short)(mx * 0x8);
 
             _mouseDelta = Vector2.Zero;
-        }
+        }*/
+        #endregion
 
-        private bool IsPressed(InputKeyBinding binding)
-        {
-            // клавиши
-            foreach (var doomKey in binding.Keys)
-                if (_pressedKeys.Contains(DoomToWpf(doomKey))) return true;
+        #region IDisposable
+        public override void Dispose() => GlobalKeyboardHook.Uninstall();
+        #endregion
 
-            // кнопки мыши
-            //foreach (var mb in binding.MouseButtons)
-            //    if (IsMousePressed(mb)) return true;
-
-            return false;
-        }
-
-        private bool IsMousePressed(int mb) => mb switch
-        {
-            //0 => _pressedMouse.Contains(MouseButton.Left),
-            //1 => _pressedMouse.Contains(MouseButton.Right),
-            //2 => _pressedMouse.Contains(MouseButton.Middle),
-            //_ => false
-        };
-
-        private void OnKeyDown(object? s, KeyEventArgs e)
-        {
-            _pressedKeys.Add(e.Key);
-            SendMenuEvent(e.Key, true);
-        }
-
-        private void OnKeyUp(object? s, KeyEventArgs e)
-        {
-            _pressedKeys.Remove(e.Key);
-            SendMenuEvent(e.Key, false);
-        }
-
-        private void OnMouseMove(object? s, MouseEventArgs e)
-        {
-            //if (!_mouseGrabbed) return;
-            //var p = e.GetPosition(_window);
-            //_mouseDelta += new Vector2((float)p.X, (float)p.Y);
-        }
-
-        private void OnMouseDown(object? s, MouseButtonEventArgs e) { }
-        //=> _pressedMouse.Add(e.ChangedButton);
-
-        private void OnMouseUp(object? s, MouseButtonEventArgs e) { }
-            //=> _pressedMouse.Remove(e.ChangedButton);
-
-        private void SendMenuEvent(Key key, bool down)
-        {
-            DoomKey? mapped = key switch
-            {
-                Key.W or Key.Up => DoomKey.Up,
-                Key.S or Key.Down => DoomKey.Down,
-                Key.A or Key.Left => DoomKey.Left,
-                Key.D or Key.Right => DoomKey.Right,
-
-                Key.Space or Key.Enter => DoomKey.Enter,
-                Key.Escape => DoomKey.Escape,
-                Key.Y => DoomKey.Y,
-                Key.N => DoomKey.N,
-                _ => null
-            };
-
-            if (mapped.HasValue)
-                _postEvent?.Invoke(new DoomEvent(down ? EventType.KeyDown : EventType.KeyUp, mapped.Value));
-        }
-
+        #region Key mapping
         private static Key DoomToWpf(DoomKey k) => k switch
         {
             DoomKey.A => Key.A,
@@ -349,5 +266,6 @@ namespace RevitDoom.UserInput
             DoomKey.F12 => Key.F12,
             _ => Key.None
         };
+        #endregion
     }
 }

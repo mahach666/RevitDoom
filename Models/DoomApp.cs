@@ -4,7 +4,6 @@ using DoomNetFrameworkEngine.DoomEntity.Game;
 using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.Video;
 using RevitDoom.Contracts;
-using RevitDoom.UserInput;
 using System.Linq;
 
 namespace RevitDoom.Models
@@ -13,7 +12,7 @@ namespace RevitDoom.Models
     {
         private DoomAppOptions _options;
         private IDirectContextController _directContextService;
-        private WpfUserInput _input;
+        private CastomUserInput _input;
         private Config _config;
 
         private Doom _doom;
@@ -24,7 +23,7 @@ namespace RevitDoom.Models
 
         public DoomApp(DoomAppOptions doomAppOptions,
             IDirectContextController directContextService,
-            WpfUserInput userInput,
+            CastomUserInput userInput,
             Config config)
         {
             _options = doomAppOptions;

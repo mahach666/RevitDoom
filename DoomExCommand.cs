@@ -55,7 +55,7 @@ namespace RevitDoom
             container.Register<IRevitDirectServerController, RevitService>(Lifestyle.Singleton);
             container.Register<IServerFactory, ServerFactory>(Lifestyle.Singleton);
             container.Register<IDirectContextController, DirectContextService>(Lifestyle.Singleton);
-            container.Register<WpfUserInput>(Lifestyle.Singleton);
+            container.Register<CastomUserInput,LowUserInput>(Lifestyle.Singleton);
             container.Register<DoomApp>(Lifestyle.Singleton);
             container.Register<MainVM>();
             container.Register<MainView>();
