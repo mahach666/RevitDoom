@@ -1,4 +1,5 @@
-﻿namespace DoomNetFrameworkEngine.DoomEntity.MathUtils
+﻿namespace RevitDoom.Utils
+
 {
     internal static class NetFunc
     {

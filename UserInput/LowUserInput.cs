@@ -1,10 +1,10 @@
 ﻿using DoomNetFrameworkEngine;
 using DoomNetFrameworkEngine.DoomEntity.Event;
 using DoomNetFrameworkEngine.DoomEntity.Game;
-using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.DoomEntity.World;
 using DoomNetFrameworkEngine.UserInput;
 using RevitDoom.Contracts;
+using RevitDoom.Utils;
 using System;
 using System.Collections.Generic;
 using System.Numerics;

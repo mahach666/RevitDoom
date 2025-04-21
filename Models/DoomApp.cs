@@ -1,14 +1,21 @@
-﻿using DoomNetFrameworkEngine;
+﻿using Autodesk.Revit.DB;
+using DoomNetFrameworkEngine;
 using DoomNetFrameworkEngine.DoomEntity;
 using DoomNetFrameworkEngine.DoomEntity.Game;
 using DoomNetFrameworkEngine.DoomEntity.MathUtils;
 using DoomNetFrameworkEngine.Video;
 using RevitDoom.Contracts;
+using RevitDoom.Enums;
+using RevitDoom.UserInput;
+using RevitDoom.Utils;
+using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RevitDoom.Models
 {
-    public class DoomApp
+    public class DoomApp : IDisposable
     {
         private DoomAppOptions _options;
         private IDirectContextController _directContextService;
@@ -20,6 +27,9 @@ namespace RevitDoom.Models
         private byte[] _buffer;
         private int _width;
         private int _height;
+        private ExEvent _task;
+        private Quality _quality;
+
 
         public DoomApp(DoomAppOptions doomAppOptions,
             IDirectContextController directContextService,
@@ -35,6 +45,8 @@ namespace RevitDoom.Models
 
         private void Initialize()
         {
+            _task = new ExEvent();
+
             var argsList = new[] { "-iwad", _options.IwadPath };
             if (_options.ExtraArgs.Length > 0)
             {
@@ -73,6 +85,77 @@ namespace RevitDoom.Models
             {
 
             }
+        }
+
+        public event Action<double> FpsUpdated;
+
+        private int _frameDelay = 1;
+        private bool _isValid = true;
+
+        public async Task RunAsync(Quality quality, CancellationToken token)
+        {
+            SetQuality(quality);
+            int frameCount = 0;
+            var lastFpsTime = DateTime.Now;
+
+            GlobalKeyboardHook.Install();
+
+            try
+            {
+                while (!token.IsCancellationRequested && _isValid)
+                {
+                    NextFrame();
+
+                    await _task.Run(app =>
+                    {
+                        if (!_directContextService.IsValid(_quality))
+                            _directContextService.RegisterServer<FlatFaceServer>(_quality);
+
+                        using (Transaction t = new Transaction(app.ActiveUIDocument.Document, "Graphics update"))
+                        {
+                            t.Start();
+                            app.ActiveUIDocument.RefreshActiveView();
+                            t.Commit();
+                        }
+                    });
+
+                    frameCount++;
+                    var now = DateTime.Now;
+                    if ((now - lastFpsTime).TotalSeconds >= 1.0)
+                    {
+                        double fps = frameCount / (now - lastFpsTime).TotalSeconds;
+                        FpsUpdated?.Invoke(fps);
+                        frameCount = 0;
+                        lastFpsTime = now;
+                    }
+
+                    await Task.Delay(_frameDelay);
+                }
+            }
+            finally
+            {
+                GlobalKeyboardHook.Uninstall();
+                if (!_isValid)
+                {
+                    Dispose();
+                }
+            }
+        }
+
+        public void SetQuality(Quality quality)
+        {
+            if (_quality != quality)
+            {
+                _quality = quality;
+            }
+        }
+
+        public void Dispose()
+        {
+            _isValid = false;
+            _input?.Dispose();
+            _directContextService?.UnregisterAllServers();
+            GlobalKeyboardHook.Uninstall();
         }
     }
 }
