@@ -119,26 +119,20 @@ public class MeshFaceBufferStorage : BaseBufferStorage
         return vertices != null && indices != null;
     }
 
-
-
     public override void AddVertexPosition()
     {
         throw new NotImplementedException();
     }
-
     public override void AddVertexPositionColored(ColorWithTransparency color)
     {
         throw new NotImplementedException();
     }
-
     public override void AddVertexPositionNormal()
     {
         throw new NotImplementedException();
     }
-
     public override void AddVertexPosition(ColorWithTransparency color)
     {
         throw new NotImplementedException();
     }
-
 }

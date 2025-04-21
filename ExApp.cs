@@ -1,5 +1,4 @@
 ﻿using Autodesk.Revit.UI;
-using System;
 using System.Reflection;
 
 namespace RevitDoom

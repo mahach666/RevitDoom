@@ -1,5 +1,4 @@
-﻿using Autodesk.Revit.DB.DirectContext3D;
-using RevitDoom.Enums;
+﻿using RevitDoom.Enums;
 
 namespace RevitDoom.Contracts
 {

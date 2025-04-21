@@ -51,6 +51,5 @@ namespace RevitDoom.Models
         public bool IsValid(Quality quality) => _activeServer != null && quality == CurrentQuality;
 
         public void Dispose() => UnregisterAllServers();
-
     }
 }

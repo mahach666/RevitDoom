@@ -13,14 +13,10 @@ public class FlatFaceServer : CastomDirectContextServer
 {
     private Guid m_guid = Guid.NewGuid();
 
-    private UIDocument m_uiDocument;
-
     private List<FaceData> faces = new();
 
-    public FlatFaceServer(UIDocument uiDoc, int width, int height, double cellSize)
+    public FlatFaceServer( int width, int height, double cellSize)
     {
-        m_uiDocument = uiDoc;
-
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -170,10 +166,10 @@ public class FlatFaceServer : CastomDirectContextServer
     public override bool UseInTransparentPass(View view) => false;
     public override bool CanExecute(View view) => true;
     public override Guid GetServerId() => m_guid;
-    public override string GetVendorId() => "GenFusions";
+    public override string GetVendorId() => "DOOM";
     public override ExternalServiceId GetServiceId() => ExternalServices.BuiltInExternalServices.DirectContext3DService;
-    public override string GetName() => "Flat Screen Server";
-    public override string GetDescription() => "Draws flat quads instead of cubes";
+    public override string GetName() => "DOOM Screen Server";
+    public override string GetDescription() => "Draws DOOM in triangles";
     public override string GetApplicationId() => "";
     public override string GetSourceId() => "";
 }
