@@ -1,7 +1,6 @@
 ﻿using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.DirectContext3D;
 using Autodesk.Revit.DB.ExternalService;
-using Autodesk.Revit.UI;
 using RevitDoom.Contracts;
 using RevitDoom.RevitDrow;
 using System;
@@ -43,7 +42,6 @@ public class FlatFaceServer : CastomDirectContextServer
             faces[index].FaceColor = color;
         }
     }
-
 
     public override void SetPixels(byte[] buffer, int width, int height)
     {

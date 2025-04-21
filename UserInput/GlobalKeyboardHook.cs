@@ -110,5 +110,4 @@ namespace RevitDoom.UserInput
             return CallNextHookEx(_hHook, nCode, wParam, lParam);
         }
     }
-
 }
