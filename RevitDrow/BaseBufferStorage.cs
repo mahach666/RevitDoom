@@ -25,12 +25,6 @@ public abstract class BaseBufferStorage
 
     public EffectInstance EffectInstance { get; set; }
 
-    //
-    // Сводка:
-    //     Constroctor
-    //
-    // Параметры:
-    //   displayStyle:
     public BaseBufferStorage(DisplayStyle displayStyle)
     {
         DisplayStyle = displayStyle;

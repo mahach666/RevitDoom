@@ -8,14 +8,15 @@ namespace RevitDoom.UserInput
     internal static class GlobalKeyboardHook
     {
         private const int WH_KEYBOARD_LL = 13;
+        private const int WM_KEYUP = 0x0101;
         private const int HC_ACTION = 0;
         private const int WM_KEYDOWN = 0x0100;
         private const int WM_SYSKEYDOWN = 0x0104;
+        private const int WM_SYSKEYUP = 0x0105;
 
         private static IntPtr _hHook = IntPtr.Zero;
         private static readonly LowLevelKeyboardProc _proc = HookCallback;
 
-        // Список virtual‑key, которые хотим заблокировать для Revit
         private static readonly HashSet<int> _blocked = new()
         {
             VK(Key.W), VK(Key.A), VK(Key.S), VK(Key.D),
@@ -30,10 +31,6 @@ namespace RevitDoom.UserInput
 
         static GlobalKeyboardHook() => Install();
 
-        internal static bool IsKeyDown(Key key)
-            => (GetAsyncKeyState(VK(key)) & 0x8000) != 0;
-
-     
         internal static void Install()
         {
             if (_hHook != IntPtr.Zero) return;
@@ -42,27 +39,17 @@ namespace RevitDoom.UserInput
             _hHook = SetWindowsHookEx(WH_KEYBOARD_LL, _proc, hModule, 0);
         }
 
+        private static void ClearState()
+        {
+            Array.Clear(_state, 0, _state.Length);
+        }
+
         internal static void Uninstall()
         {
             if (_hHook == IntPtr.Zero) return;
             UnhookWindowsHookEx(_hHook);
             _hHook = IntPtr.Zero;
-        }
-  
-        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
-        {
-            if (nCode == HC_ACTION)
-            {
-                int msg = wParam.ToInt32();
-                if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN)
-                {
-                    var info = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
-
-                    if (_blocked.Contains((int)info.vkCode))
-                        return (IntPtr)1;
-                }
-            }
-            return CallNextHookEx(_hHook, nCode, wParam, lParam);
+            ClearState();
         }
 
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
@@ -96,6 +83,32 @@ namespace RevitDoom.UserInput
         }
 
         private static int VK(Key k) => KeyInterop.VirtualKeyFromKey(k);
+
+        private static readonly bool[] _state = new bool[256];
+
+        internal static bool IsKeyDown(Key key) => _state[VK(key)];
+
+        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode == HC_ACTION)
+            {
+                int msg = wParam.ToInt32();
+                if (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN ||
+                    msg == WM_KEYUP || msg == WM_SYSKEYUP)
+                {
+                    var info = Marshal.PtrToStructure<KBDLLHOOKSTRUCT>(lParam);
+                    int vk = (int)info.vkCode;
+
+                    bool down = (msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN);
+
+                    _state[vk] = down;
+
+                    if (down && _blocked.Contains(vk))
+                        return (IntPtr)1;           
+                }
+            }
+            return CallNextHookEx(_hHook, nCode, wParam, lParam);
+        }
     }
 
 }

@@ -8,7 +8,6 @@ using RevitDoom.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Windows;
 using System.Windows.Input;
 using InputKeyBinding = DoomNetFrameworkEngine.UserInput.KeyBinding;
 
@@ -33,10 +32,7 @@ namespace RevitDoom.UserInput
             _ = GlobalKeyboardHook.IsKeyDown(Key.None);
             _config = config;
         }
-
-        #region IUserInput infrastructure
         public override void RegisterAppEvent(Action<DoomEvent> postEvent) => _postEvent = postEvent;
-        public void AttachWindow(Window _) { /* больше ничего не привязываем */ }
 
         public override void Reset()
         {
@@ -53,9 +49,7 @@ namespace RevitDoom.UserInput
             get => _config.mouse_sensitivity;
             set => _config.mouse_sensitivity = value;
         }
-        #endregion
 
-        #region Main game loop
         public override void BuildTicCmd(TicCmd cmd)
         {
             bool kForward = IsPressed(_config.key_forward);
@@ -115,18 +109,29 @@ namespace RevitDoom.UserInput
                     break;
                 }
 
-            // 
-            // if (_mouseGrabbed) ApplyMouse(ref cmd, ref forward, ref side, kStrafe);
-
             forward = NetFunc.Clamp(forward, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
             side = NetFunc.Clamp(side, -PlayerBehavior.MaxMove, PlayerBehavior.MaxMove);
 
             cmd.ForwardMove += (sbyte)forward;
             cmd.SideMove += (sbyte)side;
-        }
-        #endregion
 
-        #region Меню
+            SendEsc();   
+        }
+
+        private void SendEsc()
+        {
+            bool down = IsDown(Key.Escape);
+            if (down)
+            {
+                if (_menuPressedKeys.Add(Key.Escape))
+                    _postEvent?.Invoke(new DoomEvent(EventType.KeyDown, DoomKey.Escape));
+            }
+            else if (_menuPressedKeys.Remove(Key.Escape))
+            {
+                _postEvent?.Invoke(new DoomEvent(EventType.KeyUp, DoomKey.Escape));
+            }
+        }
+
         public override void PollMenuKeys()
         {
             SendMenuKey(Key.Up, DoomKey.Up);
@@ -162,40 +167,35 @@ namespace RevitDoom.UserInput
                 _postEvent?.Invoke(new DoomEvent(EventType.KeyUp, mapped));
             }
         }
-        #endregion
 
-        #region Helpers
+
+
         private bool IsPressed(InputKeyBinding binding)
         {
             foreach (var doomKey in binding.Keys)
                 if (IsDown(DoomToWpf(doomKey)))
-                    return true;
-            // аналогично можно проверять binding.MouseButtons через GetAsyncKeyState
+                    return true;           
             return false;
         }
 
         private static bool IsDown(Key key) => GlobalKeyboardHook.IsKeyDown(key);
 
-        /* 
-        private void ApplyMouse(ref TicCmd cmd, ref int forward, ref int side, bool strafe)
-        {
-            var ms = 0.5f * _config.mouse_sensitivity;
-            var mx = (int)NetFunc.RoundF(ms * _mouseDelta.X);
-            var my = (int)NetFunc.RoundF(ms * -_mouseDelta.Y);
+   
+        //private void ApplyMouse(ref TicCmd cmd, ref int forward, ref int side, bool strafe)
+        //{
+        //    var ms = 0.5f * _config.mouse_sensitivity;
+        //    var mx = (int)NetFunc.RoundF(ms * _mouseDelta.X);
+        //    var my = (int)NetFunc.RoundF(ms * -_mouseDelta.Y);
 
-            forward += my;
-            if (strafe) side += mx * 2;
-            else        cmd.AngleTurn -= (short)(mx * 0x8);
+        //    forward += my;
+        //    if (strafe) side += mx * 2;
+        //    else        cmd.AngleTurn -= (short)(mx * 0x8);
 
-            _mouseDelta = Vector2.Zero;
-        }*/
-        #endregion
+        //    _mouseDelta = Vector2.Zero;
+        //}
 
-        #region IDisposable
         public override void Dispose() => GlobalKeyboardHook.Uninstall();
-        #endregion
 
-        #region Key mapping
         private static Key DoomToWpf(DoomKey k) => k switch
         {
             DoomKey.A => Key.A,
@@ -266,6 +266,5 @@ namespace RevitDoom.UserInput
             DoomKey.F12 => Key.F12,
             _ => Key.None
         };
-        #endregion
     }
 }

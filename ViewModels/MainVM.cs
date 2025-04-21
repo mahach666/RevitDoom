@@ -71,7 +71,7 @@ namespace RevitDoom.ViewModels
             {
                 while (_isRunning)
                 {
-                    //GlobalKeyboardHook.Install();
+                    GlobalKeyboardHook.Install();
                     _doomApp.NextFrame();
 
                     await _task.Run(app =>
@@ -108,7 +108,7 @@ namespace RevitDoom.ViewModels
             finally
             {
                 _isRunning = false;
-                //GlobalKeyboardHook.Uninstall();
+                GlobalKeyboardHook.Uninstall();
             }
         }
 

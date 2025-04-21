@@ -215,11 +215,9 @@ namespace RevitDoom.UserInput
 
         private bool IsPressed(InputKeyBinding binding)
         {
-            // клавиши
             foreach (var doomKey in binding.Keys)
                 if (_pressedKeys.Contains(DoomToWpf(doomKey))) return true;
 
-            // кнопки мыши
             //foreach (var mb in binding.MouseButtons)
             //    if (IsMousePressed(mb)) return true;
 
