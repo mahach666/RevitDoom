@@ -50,7 +50,11 @@
 		<AssemblyFileVersion>1.1.5</AssemblyFileVersion>
 		<Version>$(RevitVersion).$(AssemblyFileVersion)</Version>
 		<BaseOutputPath>..\bin</BaseOutputPath>
-	</PropertyGroup>
+	</PropertyGroup>	
+
+	<ItemGroup>
+	  <None Remove="Icons\doomlogo.png" />
+	</ItemGroup>
 	
 
 
@@ -80,6 +84,10 @@
 	<ItemGroup>
 		<Reference Include="System.Windows.Forms" />
 		<Reference Include="WindowsBase" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Resource Include="Icons\doomlogo.png" />
 	</ItemGroup>
 
 	<Target Name="CopyAllPackageReferences" AfterTargets="Build">

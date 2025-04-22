@@ -13,14 +13,15 @@ using SimpleInjector;
 namespace RevitDoom
 {
     [Transaction(TransactionMode.Manual)]
-    public class DoomExCommand : IExternalCommand
+    public class DoomExCommand : IExternalCommand, IExternalCommandAvailability
     {
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             Resolver.Resolve();
 
-            XYZ focus = new XYZ(0, 0, 0);
-            DoomFileLoader.LoadAndFocusDoom(commandData.Application, new XYZ(-1, 0, 0), new XYZ(0, 0, 1));
+            DoomFileLoader.LoadAndFocusDoom(commandData.Application
+                , new XYZ(-1, 0, 0)
+                , new XYZ(0, 0, 1));
 
             var uiApp = commandData.Application;
 
@@ -65,5 +66,8 @@ namespace RevitDoom
 
             return container;
         }
+
+        public bool IsCommandAvailable(UIApplication applicationData, CategorySet selectedCategories)
+        => true;
     }
 }

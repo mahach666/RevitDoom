@@ -1,5 +1,6 @@
 ﻿using Autodesk.Revit.UI;
-using System.Reflection;
+using System;
+using System.Windows.Media.Imaging;
 
 namespace RevitDoom
 {
@@ -8,30 +9,36 @@ namespace RevitDoom
         public Result OnShutdown(UIControlledApplication application)
         {
 
-
             return Result.Succeeded;
         }
 
         public Result OnStartup(UIControlledApplication application)
         {
-            try
-            {
-                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
-
-                string tabName = "DOOM";
-                application.CreateRibbonTab(tabName);
-
-                RibbonPanel doomPanel = application.CreateRibbonPanel(tabName, "DOOM");
-
-                PushButtonData doomBut = new PushButtonData(nameof(DoomExCommand), "DOOM", assemblyLocation, typeof(DoomExCommand).FullName);
-                doomPanel.AddItem(doomBut);
-            }
-            catch
-            {
-
-            }
+            BuildRibbonPanel(application);
 
             return Result.Succeeded;
+        }
+
+        private static void BuildRibbonPanel(UIControlledApplication application)
+        {
+            var assembly = typeof(ExApp).Assembly;
+
+            var APP_NAME = "DOOM";
+
+            RibbonPanel ribbonPanel = application.CreateRibbonPanel(APP_NAME);
+
+            PushButtonData buttonData = new PushButtonData(
+                            APP_NAME,
+                            "DOOM",
+                            assembly.Location,
+                            typeof(DoomExCommand).FullName)
+            {
+                LargeImage = new BitmapImage(new Uri(@"/RevitDoom;component/Icons/doomlogo.png", UriKind.RelativeOrAbsolute))
+            };
+
+            buttonData.AvailabilityClassName = typeof(DoomExCommand).FullName;
+
+            ribbonPanel.AddItem(buttonData);
         }
     }
 }
