@@ -19,6 +19,9 @@ namespace RevitDoom
         {
             Resolver.Resolve();
 
+            XYZ focus = new XYZ(0, 0, 0);
+            DoomFileLoader.LoadAndFocusDoom(commandData.Application, new XYZ(-1, 0, 0), new XYZ(0, 0, 1));
+
             var uiApp = commandData.Application;
 
             var wadPath = UserSelect.GetWad();
@@ -55,7 +58,7 @@ namespace RevitDoom
             container.Register<IRevitDirectServerController, RevitService>(Lifestyle.Singleton);
             container.Register<IServerFactory, ServerFactory>(Lifestyle.Singleton);
             container.Register<IDirectContextController, DirectContextService>(Lifestyle.Singleton);
-            container.Register<CastomUserInput,LowUserInput>(Lifestyle.Singleton);
+            container.Register<CastomUserInput, LowUserInput>(Lifestyle.Singleton);
             container.Register<DoomApp>(Lifestyle.Singleton);
             container.Register<MainVM>();
             container.Register<MainView>();

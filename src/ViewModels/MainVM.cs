@@ -22,6 +22,7 @@ namespace RevitDoom.ViewModels
         {
             _doomApp = doomApp;
             _directContextService = directContextService;
+            GlobalKeyboardHook.Uninstall();
         }
 
         private string _fpsText = $"FPS: -";
