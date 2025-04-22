@@ -1,0 +1,10 @@
+﻿<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>RevitDoom</Name>
+    <Assembly>RevitDoom/RevitDoom.dll</Assembly>
+    <AddInId>12345678-90AB-CDEF-1234-567890ABCDEF</AddInId>
+    <FullClassName>RevitDoom.ExApp</FullClassName>
+    <VendorId>DOOM</VendorId>
+    <VendorDescription>DOOM</VendorDescription>
+  </AddIn>
+</RevitAddIns>
